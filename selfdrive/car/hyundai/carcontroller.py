@@ -1226,7 +1226,9 @@ class CarController():
     if frame % 5 == 0 and self.car_fingerprint in FEATURES["send_lfahda_mfa"]:
       can_sends.append(create_lfahda_mfc(self.packer, lkas_active))
 
-    elif frame % 5 == 0 and self.car_fingerprint in FEATURES["send_hda_mfa"]:
+    elif frame % 5 == 0 and self.car_fingerprint in FEATURES["send_hda_mfa"] and not (
+      self.car_fingerprint == CAR.GRANDEUR_HEV_IG and self.no_scc
+    ):
       can_sends.append(create_hda_mfc(self.packer, CS, enabled, left_lane, right_lane))
 
     new_actuators = actuators.copy()
