@@ -1,5 +1,10 @@
 #!/usr/bin/bash
 
+# Start Tailscale for remote maintenance when installed outside the repo.
+if [ -x /data/tailscale/start.sh ]; then
+  /data/tailscale/start.sh >/data/tailscale/run/boot-start.log 2>&1
+fi
+
 # prebuilt recreate
 if [ -f "/data/opkr_compiling" ]; then
     rm -f /data/opkr_compiling
