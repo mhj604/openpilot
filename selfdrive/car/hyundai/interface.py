@@ -320,8 +320,8 @@ class CarInterface(CarInterfaceBase):
         be.type = ButtonType.decelCruise
       elif but == Buttons.GAP_DIST:
         be.type = ButtonType.gapAdjustCruise
-      #elif but == Buttons.CANCEL:
-      #  be.type = ButtonType.cancel
+      elif but == Buttons.CANCEL and self.no_mfc:
+        be.type = ButtonType.cancel
       else:
         be.type = ButtonType.unknown
       buttonEvents.append(be)
@@ -332,7 +332,17 @@ class CarInterface(CarInterfaceBase):
       buttonEvents.append(be)
     ret.buttonEvents = buttonEvents
 
-    events = self.create_common_events(ret)
+    events = self.create_common_events(
+      ret, pcm_enable=not self.no_mfc
+    )
+
+    # No-SCC lateral-only must never engage outside Drive.
+    if self.no_mfc and ret.gearShifter != car.CarState.GearShifter.drive:
+      events.add(EventName.wrongGear)
+
+    # Brake must inhibit engagement and disengage lateral control.
+    if self.no_mfc and ret.brakePressed:
+      events.add(EventName.pedalPressed)
 
     if self.CC.longcontrol and self.CS.brake_error:
       events.add(EventName.brakeUnavailable)
@@ -418,7 +428,11 @@ class CarInterface(CarInterfaceBase):
       # do disable on button down
       if b.type == ButtonType.cancel and b.pressed:
         events.add(EventName.buttonCancel)
-      if self.CC.longcontrol and not self.CC.scc_live:
+      if self.no_mfc:
+        # No-SCC lateral-only: SET/RES release enables openpilot.
+        if b.type in (ButtonType.accelCruise, ButtonType.decelCruise) and not b.pressed:
+          events.add(EventName.buttonEnable)
+      elif self.CC.longcontrol and not self.CC.scc_live:
         # do enable on both accel and decel buttons
         if b.type in (ButtonType.accelCruise, ButtonType.decelCruise) and not b.pressed:
           events.add(EventName.buttonEnable)

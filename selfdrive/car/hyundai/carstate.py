@@ -253,7 +253,10 @@ class CarState(CarStateBase):
 
     # TODO: Find brake pressure
     ret.brake = 0
-    ret.brakePressed = cp.vl["TCS13"]["DriverBraking"] != 0
+    if self.no_mfc:
+      ret.brakePressed = cp.vl["ESP12"]["CYL_PRES"] > 0
+    else:
+      ret.brakePressed = cp.vl["TCS13"]["DriverBraking"] != 0
 
     if ret.brakePressed:
       self.brake_check = True

@@ -6,6 +6,8 @@ int car_SCC_live = 0;
 int OP_EMS_live = 0;
 int HKG_mdps_bus = -1;
 int HKG_scc_bus = -1;
+bool HKG_no_camera = false;
+bool HKG_brake_pressed = false;
 
 #define HYUNDAI_COMMUNITY_PARAM_NO_CAMERA 0x100U
 const CanMsg HYUNDAI_COMMUNITY_TX_MSGS[] = {
@@ -98,12 +100,24 @@ static int hyundai_community_rx_hook(CANPacket_t *to_push) {
       cruise_engaged_prev = cruise_engaged;
     }
 
+    // Grandeur no-MFC brake pressure: ESP12 CYL_PRES, bit 26, 12-bit.
+    if (HKG_no_camera && addr == 544 && bus == 0) {
+      uint32_t cyl_pres_raw = ((GET_BYTES_04(to_push) >> 26) & 0x3FU) |
+                              ((GET_BYTE(to_push, 4) & 0x3FU) << 6);
+      HKG_brake_pressed = cyl_pres_raw > 0U;
+      if (HKG_brake_pressed) {
+        controls_allowed = 0;
+      }
+    }
+
     // cruise control for car without SCC
     if (addr == 1265 && bus == 0 && HKG_scc_bus == -1 && !OP_SCC_live) {
       // first byte
       int cruise_engaged = (GET_BYTES_04(to_push) & 0x7);
       // enable on res+ or set- buttons press
-      if (!controls_allowed && (cruise_engaged == 1 || cruise_engaged == 2)) {
+      if (!controls_allowed &&
+          (!HKG_no_camera || !HKG_brake_pressed) &&
+          (cruise_engaged == 1 || cruise_engaged == 2)) {
         controls_allowed = 1;
       }
       // disable on cancel press
@@ -281,8 +295,11 @@ static const addr_checks* hyundai_community_init(uint16_t param) {
   controls_allowed = false;
   relay_malfunction_reset();
 
+  HKG_no_camera = (param & HYUNDAI_COMMUNITY_PARAM_NO_CAMERA) != 0U;
+  HKG_brake_pressed = false;
+
   // No physical MFC/camera CAN: do not forward C-CAN to empty bus 2.
-  HKG_forward_bus2 = (param & HYUNDAI_COMMUNITY_PARAM_NO_CAMERA) == 0U;
+  HKG_forward_bus2 = !HKG_no_camera;
 
   if (current_board->has_obd && HKG_forward_obd) {
     current_board->set_can_mode(CAN_MODE_OBD_CAN2);
