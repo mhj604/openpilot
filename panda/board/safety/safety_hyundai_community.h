@@ -6,6 +6,8 @@ int car_SCC_live = 0;
 int OP_EMS_live = 0;
 int HKG_mdps_bus = -1;
 int HKG_scc_bus = -1;
+
+#define HYUNDAI_COMMUNITY_PARAM_NO_CAMERA 0x100U
 const CanMsg HYUNDAI_COMMUNITY_TX_MSGS[] = {
   {832, 0, 8}, {832, 1, 8}, // LKAS11 Bus 0, 1
   {1265, 0, 4}, {1265, 1, 4}, {1265, 2, 4}, // CLU11 Bus 0, 1, 2
@@ -276,9 +278,11 @@ static int hyundai_community_fwd_hook(int bus_num, CANPacket_t *to_fwd) {
 }
 
 static const addr_checks* hyundai_community_init(uint16_t param) {
-  UNUSED(param);
   controls_allowed = false;
   relay_malfunction_reset();
+
+  // No physical MFC/camera CAN: do not forward C-CAN to empty bus 2.
+  HKG_forward_bus2 = (param & HYUNDAI_COMMUNITY_PARAM_NO_CAMERA) == 0U;
 
   if (current_board->has_obd && HKG_forward_obd) {
     current_board->set_can_mode(CAN_MODE_OBD_CAN2);

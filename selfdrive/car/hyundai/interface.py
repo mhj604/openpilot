@@ -277,7 +277,8 @@ class CarInterface(CarInterfaceBase):
 
     # set safety_hyundai_community only for non-SCC, MDPS harrness or SCC harrness cars or cars that have unknown issue
     if ret.radarOffCan or ret.mdpsBus == 1 or ret.openpilotLongitudinalControl or params.get_bool("UFCModeEnabled"):
-      ret.safetyConfigs = [get_safety_config(car.CarParams.SafetyModel.hyundaiCommunity, 0)]
+      community_param = 0x100 if candidate == CAR.GRANDEUR_HEV_IG and ret.sccBus == -1 else 0
+      ret.safetyConfigs = [get_safety_config(car.CarParams.SafetyModel.hyundaiCommunity, community_param)]
     return ret
 
   # @staticmethod
