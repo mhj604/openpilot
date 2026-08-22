@@ -24,6 +24,8 @@ class CarInterface(CarInterfaceBase):
     self.blinker_timer = 0
     self.ufc_mode_enabled = Params().get_bool('UFCModeEnabled')
     self.no_mdps_mods = Params().get_bool('NoSmartMDPS')
+    # This vehicle-specific branch supports the Grandeur IG HEV without MFC/SCC.
+    self.no_mfc = CP.carFingerprint == CAR.GRANDEUR_HEV_IG and CP.sccBus == -1
 
   @staticmethod
   def get_pid_accel_limits(CP, current_speed, cruise_speed):
@@ -49,7 +51,11 @@ class CarInterface(CarInterfaceBase):
 
     ret.radarOffCan = ret.sccBus == -1
     ret.standStill = False
-    ret.openpilotLongitudinalControl = Params().get_bool("RadarDisable") or ret.sccBus == 2
+
+    # No-SCC Grandeur port starts lateral-only. Never enable radar-disable /
+    # synthetic longitudinal control merely from the persistent RadarDisable param.
+    grandeur_no_scc = candidate == CAR.GRANDEUR_HEV_IG and ret.sccBus == -1
+    ret.openpilotLongitudinalControl = False if grandeur_no_scc else (Params().get_bool("RadarDisable") or ret.sccBus == 2)
 
 
 
@@ -285,10 +291,11 @@ class CarInterface(CarInterfaceBase):
     self.cp_cam.update_strings(can_strings)
 
     ret = self.CS.update(self.cp, self.cp2, self.cp_cam)
-    ret.canValid = self.cp.can_valid and self.cp2.can_valid and self.cp_cam.can_valid
+    camera_can_valid = self.cp_cam.can_valid or self.no_mfc
+    ret.canValid = self.cp.can_valid and self.cp2.can_valid and camera_can_valid
     ret.steeringRateLimited = self.CC.steer_rate_limited if self.CC is not None else False
 
-    if not self.cp.can_valid or not self.cp2.can_valid or not self.cp_cam.can_valid:
+    if not self.cp.can_valid or not self.cp2.can_valid or (not self.cp_cam.can_valid and not self.no_mfc):
       print('cp={}  cp2={}  cp_cam={}'.format(bool(self.cp.can_valid), bool(self.cp2.can_valid), bool(self.cp_cam.can_valid)))
 
 

@@ -93,11 +93,12 @@ class CarController():
     self.v_cruise_kph_auto_res = 0
 
     self.params = Params()
+    self.no_scc = CP.sccBus == -1
     self.mode_change_switch = int(self.params.get("CruiseStatemodeSelInit", encoding="utf8"))
-    self.opkr_variablecruise = self.params.get_bool("OpkrVariableCruise")
-    self.opkr_autoresume = self.params.get_bool("OpkrAutoResume")
+    self.opkr_variablecruise = self.params.get_bool("OpkrVariableCruise") and not self.no_scc
+    self.opkr_autoresume = self.params.get_bool("OpkrAutoResume") and not self.no_scc
     self.opkr_cruisegap_auto_adj = self.params.get_bool("CruiseGapAdjust")
-    self.opkr_cruise_auto_res = self.params.get_bool("CruiseAutoRes")
+    self.opkr_cruise_auto_res = self.params.get_bool("CruiseAutoRes") and not self.no_scc
     self.opkr_cruise_auto_res_option = int(self.params.get("AutoResOption", encoding="utf8"))
     self.opkr_cruise_auto_res_condition = int(self.params.get("AutoResCondition", encoding="utf8"))
 
@@ -187,7 +188,7 @@ class CarController():
 
     self.user_specific_feature = int(self.params.get("UserSpecificFeature", encoding="utf8"))
 
-    self.gap_by_spd_on = self.params.get_bool("CruiseGapBySpdOn")
+    self.gap_by_spd_on = self.params.get_bool("CruiseGapBySpdOn") and not self.no_scc
     self.gap_by_spd_spd = list(map(int, Params().get("CruiseGapBySpdSpd", encoding="utf8").split(',')))
     self.gap_by_spd_gap = list(map(int, Params().get("CruiseGapBySpdGap", encoding="utf8").split(',')))
     self.gap_by_spd_on_buffer1 = 0
@@ -202,7 +203,7 @@ class CarController():
     self.gap_by_spd_on_sw_cnt = 0
     self.gap_by_spd_on_sw_cnt2 = 0
 
-    self.radar_disabled_conf = self.params.get_bool("RadarDisable")
+    self.radar_disabled_conf = self.params.get_bool("RadarDisable") and not self.no_scc
     self.prev_cruiseButton = 0
     self.gapsettingdance = 4
     self.lead_visible = False
@@ -472,7 +473,7 @@ class CarController():
                                    cut_steer_temp, CS.lkas11, sys_warning, sys_state, enabled, left_lane, right_lane,
                                    left_lane_warning, right_lane_warning, 0, self.ldws_fix, self.lkas11_cnt))
 
-    if CS.CP.sccBus: # send lkas11 bus 1 or 2 if scc bus is
+    if CS.CP.sccBus in (1, 2): # send LKAS11 only to a real SCC bus
       can_sends.append(create_lkas11(self.packer, frame, self.car_fingerprint, apply_steer, lkas_active and not self.lkas_temp_disabled,
                                    cut_steer_temp, CS.lkas11, sys_warning, sys_state, enabled, left_lane, right_lane,
                                    left_lane_warning, right_lane_warning, CS.CP.sccBus, self.ldws_fix, self.lkas11_cnt))

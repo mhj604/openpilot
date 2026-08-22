@@ -27,6 +27,7 @@ class CarState(CarStateBase):
 
     #Auto detection for setup
     self.no_radar = CP.sccBus == -1
+    self.no_mfc = CP.carFingerprint == CAR.GRANDEUR_HEV_IG and self.no_radar
     self.lkas_button_on = True
     self.cruise_main_button = 0
     self.mdps_error_cnt = 0
@@ -42,7 +43,7 @@ class CarState(CarStateBase):
     self.steer_anglecorrection = float(int(Params().get("OpkrSteerAngleCorrection", encoding="utf8")) * 0.1)
     self.gear_correction = Params().get_bool("JustDoGearD")
     self.fca11_message = Params().get_bool("FCA11Message")
-    self.rd_conf = Params().get_bool("RadarDisable")
+    self.rd_conf = Params().get_bool("RadarDisable") and not self.no_radar
     self.set_spd_five = Params().get_bool("SetSpeedFive")
     self.brake_check = False
     self.cancel_check = False
@@ -398,9 +399,15 @@ class CarState(CarStateBase):
     self.lead_distance = cp_scc.vl["SCC11"]["ACC_ObjDist"] if not self.no_radar else 0
 
     ret.radarDistance = cp_scc.vl["SCC11"]["ACC_ObjDist"] if not self.no_radar else 0
-    self.lkas_error = cp_cam.vl["LKAS11"]["CF_Lkas_LdwsSysState"] == 7
-    if not self.lkas_error:
-      self.lkas_button_on = cp_cam.vl["LKAS11"]["CF_Lkas_LdwsSysState"]
+    if self.no_mfc:
+      # No factory LKAS camera exists. cp_cam provides a zero-valued LKAS11
+      # template only; do not interpret the missing camera as an LKAS fault.
+      self.lkas_error = False
+      self.lkas_button_on = True
+    else:
+      self.lkas_error = cp_cam.vl["LKAS11"]["CF_Lkas_LdwsSysState"] == 7
+      if not self.lkas_error:
+        self.lkas_button_on = cp_cam.vl["LKAS11"]["CF_Lkas_LdwsSysState"]
     
     ret.cruiseAccStatus = cp_scc.vl["SCC12"]["ACCMode"] == 1
     ret.driverAcc = self.driverOverride == 1
@@ -734,7 +741,9 @@ class CarState(CarStateBase):
       ("CF_Lkas_FcwOpt_USM", "LKAS11"),
       ("CF_Lkas_LdwsOpt_USM", "LKAS11")
     ]
-    checks = [("LKAS11", 100)]
+    # Keep the LKAS11 signals as a zero-valued template for message creation,
+    # but do not require a 100 Hz factory-camera message on the no-MFC vehicle.
+    checks = [] if CP.carFingerprint == CAR.GRANDEUR_HEV_IG and CP.sccBus == -1 else [("LKAS11", 100)]
     if CP.sccBus == 2:
       signals += [
         ("MainMode_ACC", "SCC11"),
