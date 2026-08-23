@@ -52,10 +52,9 @@ class CarInterface(CarInterfaceBase):
     ret.radarOffCan = ret.sccBus == -1
     ret.standStill = False
 
-    # No-SCC Grandeur port starts lateral-only. Never enable radar-disable /
-    # synthetic longitudinal control merely from the persistent RadarDisable param.
-    grandeur_no_scc = candidate == CAR.GRANDEUR_HEV_IG and ret.sccBus == -1
-    ret.openpilotLongitudinalControl = False if grandeur_no_scc else (Params().get_bool("RadarDisable") or ret.sccBus == 2)
+    # Enable openpilot longitudinal control when RadarDisable is enabled.
+    # The no-MFC Grandeur keeps its dedicated community safety parameter and CAN routing.
+    ret.openpilotLongitudinalControl = Params().get_bool("RadarDisable") or ret.sccBus == 2
 
 
 
