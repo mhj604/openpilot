@@ -2,6 +2,17 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="ko_KR">
 <context>
+    <name>C2NetworkPanel</name>
+    <message>
+        <source>Enable WebUI</source>
+        <translation>WebUI 사용</translation>
+    </message>
+    <message>
+        <source>Allow changing C2 settings from a web browser on port 8086. Local network and Tailscale access only.</source>
+        <translation>웹 브라우저에서 8086 포트로 C2 설정을 변경합니다. 로컬 네트워크와 Tailscale에서만 접속할 수 있습니다.</translation>
+    </message>
+</context>
+<context>
     <name>RichTextDialog</name>
     <message>
         <location filename="../qt/widgets/input.cc" line="259"/>

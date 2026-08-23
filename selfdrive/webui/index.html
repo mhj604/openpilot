@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#080a0c">
+  <title>OPKR C2 설정</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #080a0c;
+      --panel: #111417;
+      --panel-2: #191d21;
+      --line: #282d32;
+      --text: #f3f5f6;
+      --muted: #929aa2;
+      --green: #00d38a;
+      --green-dim: rgba(0, 211, 138, .14);
+      --orange: #ff9c36;
+      --red: #ff5a66;
+      --sidebar: 280px;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; background: var(--bg); color: var(--text); }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    button, input, textarea { font: inherit; }
+    button { color: inherit; }
+
+    .shell { min-height: 100vh; display: grid; grid-template-columns: var(--sidebar) 1fr; }
+    aside {
+      position: fixed; inset: 0 auto 0 0; width: var(--sidebar); padding: 30px 20px;
+      background: #0c0f11; border-right: 1px solid var(--line); overflow-y: auto;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; padding: 0 10px 26px; }
+    .comma {
+      width: 40px; height: 40px; display: grid; place-items: center; border-radius: 13px;
+      background: var(--green); color: #001b12; font-size: 28px; font-weight: 900;
+    }
+    .brand strong { display: block; font-size: 20px; letter-spacing: -.4px; }
+    .brand span { display: block; margin-top: 3px; color: var(--muted); font-size: 12px; }
+    .search-wrap { padding: 0 4px 18px; }
+    #search {
+      width: 100%; height: 44px; border: 1px solid var(--line); border-radius: 13px;
+      background: var(--panel); color: var(--text); padding: 0 14px; outline: none;
+    }
+    #search:focus { border-color: var(--green); box-shadow: 0 0 0 3px var(--green-dim); }
+    nav { display: grid; gap: 4px; }
+    .nav-button {
+      width: 100%; border: 0; border-radius: 13px; padding: 13px 14px; background: transparent;
+      color: #a7adb3; text-align: left; cursor: pointer; font-weight: 650;
+    }
+    .nav-button:hover { background: var(--panel); color: var(--text); }
+    .nav-button.active { background: var(--green-dim); color: var(--green); }
+    .nav-button small { float: right; color: #687078; font-weight: 600; }
+    .aside-note { margin: 26px 8px 0; color: #646c73; font-size: 12px; line-height: 1.55; }
+
+    main { grid-column: 2; min-width: 0; padding: 38px 48px 80px; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; gap: 20px; max-width: 1160px; margin: 0 auto 30px; }
+    h1 { margin: 0; font-size: 31px; letter-spacing: -1.1px; }
+    .subtitle { margin: 6px 0 0; color: var(--muted); font-size: 14px; }
+    .status-row { display: flex; align-items: center; gap: 10px; }
+    .badge {
+      display: inline-flex; align-items: center; gap: 7px; min-height: 35px; padding: 0 12px;
+      border: 1px solid var(--line); border-radius: 999px; color: var(--muted); font-size: 12px; font-weight: 750;
+    }
+    .badge::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--muted); }
+    .badge.offroad { border-color: rgba(0,211,138,.35); background: var(--green-dim); color: var(--green); }
+    .badge.offroad::before { background: var(--green); box-shadow: 0 0 12px var(--green); }
+    .badge.onroad { border-color: rgba(255,90,102,.35); color: var(--red); }
+    .badge.onroad::before { background: var(--red); }
+    .icon-button {
+      width: 40px; height: 40px; border: 1px solid var(--line); border-radius: 12px;
+      background: var(--panel); cursor: pointer; font-size: 18px;
+    }
+    .icon-button:hover { border-color: #475058; }
+    #content { max-width: 1160px; margin: 0 auto; }
+    .section { display: none; }
+    .section.active { display: block; animation: appear .18s ease-out; }
+    @keyframes appear { from { opacity: .25; transform: translateY(5px); } }
+    .section-head { margin-bottom: 18px; }
+    .section-head h2 { margin: 0; font-size: 23px; letter-spacing: -.55px; }
+    .section-head p { margin: 7px 0 0; color: var(--muted); font-size: 14px; }
+
+    .settings-list { overflow: hidden; border: 1px solid var(--line); border-radius: 20px; background: var(--panel); }
+    .setting {
+      display: grid; grid-template-columns: minmax(0, 1fr) minmax(160px, 330px);
+      align-items: center; gap: 32px; min-height: 91px; padding: 20px 24px;
+      border-bottom: 1px solid var(--line);
+    }
+    .setting:last-child { border-bottom: 0; }
+    .setting.hidden { display: none; }
+    .setting-title { font-size: 16px; font-weight: 720; letter-spacing: -.25px; overflow-wrap: anywhere; }
+    .setting-key { margin-left: 7px; color: #626a71; font-size: 11px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .setting-desc { margin-top: 7px; color: var(--muted); font-size: 13px; line-height: 1.48; }
+    .control { display: flex; justify-content: flex-end; align-items: center; gap: 8px; min-width: 0; }
+    .text-value {
+      width: 100%; min-height: 43px; border: 1px solid #343a40; border-radius: 12px;
+      background: #0b0e10; color: var(--text); padding: 9px 12px; outline: none;
+    }
+    textarea.text-value { min-height: 75px; resize: vertical; }
+    .text-value:focus { border-color: var(--green); box-shadow: 0 0 0 3px var(--green-dim); }
+    .text-value:disabled { color: #818990; background: #141719; cursor: not-allowed; }
+    .save-button {
+      flex: 0 0 auto; min-width: 66px; height: 43px; border: 0; border-radius: 12px;
+      background: #2b3136; color: #dce0e3; cursor: pointer; font-size: 13px; font-weight: 750;
+    }
+    .save-button:hover { background: #394147; }
+    .save-button:disabled { opacity: .4; cursor: not-allowed; }
+
+    .switch { position: relative; display: inline-block; width: 60px; height: 34px; flex: 0 0 auto; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; inset: 0; background: #353b40; border-radius: 999px; cursor: pointer; transition: .18s; }
+    .slider::before {
+      content: ""; position: absolute; width: 26px; height: 26px; left: 4px; top: 4px;
+      border-radius: 50%; background: #e9ecee; box-shadow: 0 2px 7px rgba(0,0,0,.35); transition: .18s;
+    }
+    .switch input:checked + .slider { background: var(--green); }
+    .switch input:checked + .slider::before { transform: translateX(26px); background: white; }
+    .switch input:disabled + .slider { opacity: .38; cursor: not-allowed; }
+
+    .action-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 18px; }
+    .action-button {
+      min-height: 70px; padding: 12px; border: 1px solid var(--line); border-radius: 16px;
+      background: var(--panel); cursor: pointer; font-weight: 750;
+    }
+    .action-button:hover { border-color: #4a535b; background: var(--panel-2); }
+    .action-button.danger { color: var(--red); }
+    .action-button:disabled { opacity: .42; cursor: not-allowed; }
+    .empty { padding: 48px; border: 1px dashed var(--line); border-radius: 18px; color: var(--muted); text-align: center; }
+    .search-empty { display: none; padding: 50px 20px; text-align: center; color: var(--muted); }
+
+    .toast-stack { position: fixed; z-index: 20; right: 24px; bottom: 24px; display: grid; gap: 8px; pointer-events: none; }
+    .toast {
+      min-width: 250px; max-width: 430px; padding: 14px 16px; border: 1px solid var(--line);
+      border-radius: 13px; background: #171b1e; box-shadow: 0 12px 42px rgba(0,0,0,.5);
+      font-size: 13px; animation: toast-in .2s ease-out;
+    }
+    .toast.ok { border-color: rgba(0,211,138,.45); }
+    .toast.error { border-color: rgba(255,90,102,.55); color: #ffb7bd; }
+    @keyframes toast-in { from { opacity: 0; transform: translateY(8px); } }
+    .loading { min-height: 50vh; display: grid; place-items: center; color: var(--muted); }
+
+    @media (max-width: 900px) {
+      :root { --sidebar: 0px; }
+      .shell { display: block; }
+      aside {
+        z-index: 10; position: sticky; top: 0; width: 100%; padding: 12px 14px;
+        border-right: 0; border-bottom: 1px solid var(--line);
+      }
+      .brand, .aside-note { display: none; }
+      .search-wrap { padding: 0 0 10px; }
+      nav { display: flex; gap: 5px; overflow-x: auto; scrollbar-width: none; }
+      nav::-webkit-scrollbar { display: none; }
+      .nav-button { width: auto; flex: 0 0 auto; padding: 10px 13px; white-space: nowrap; }
+      .nav-button small { display: none; }
+      main { padding: 24px 16px 60px; }
+      .topbar { align-items: flex-start; margin-bottom: 22px; }
+      h1 { font-size: 25px; }
+      .subtitle { display: none; }
+      .setting { grid-template-columns: 1fr; gap: 15px; padding: 18px; }
+      .control { justify-content: stretch; }
+      .switch { margin-left: auto; }
+      .action-grid { grid-template-columns: repeat(2, 1fr); }
+      .toast-stack { left: 16px; right: 16px; bottom: 16px; }
+      .toast { min-width: 0; max-width: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside>
+      <div class="brand">
+        <div class="comma">›</div>
+        <div><strong>OPKR C2</strong><span>on-device settings</span></div>
+      </div>
+      <div class="search-wrap"><input id="search" type="search" placeholder="설정 검색" autocomplete="off"></div>
+      <nav id="nav"></nav>
+      <p class="aside-note">설정 값은 C2의 실제 Params에 직접 저장됩니다. 주행 중에는 모든 변경 기능이 자동으로 잠깁니다.</p>
+    </aside>
+
+    <main>
+      <header class="topbar">
+        <div><h1 id="page-title">C2 설정</h1><p class="subtitle">기기 설정과 OPKR 주행 옵션을 한곳에서 관리합니다.</p></div>
+        <div class="status-row"><span id="state-badge" class="badge">연결 중</span><button id="reload" class="icon-button" title="새로고침">↻</button></div>
+      </header>
+      <div id="content"><div class="loading">설정을 불러오는 중입니다…</div></div>
+    </main>
+  </div>
+  <div id="toasts" class="toast-stack"></div>
+
+  <script>
+    'use strict';
+    var state = { sections: [], values: {}, offroad: false, active: 'device' };
+    var nav = document.getElementById('nav');
+    var content = document.getElementById('content');
+    var search = document.getElementById('search');
+    var badge = document.getElementById('state-badge');
+
+    function escapeHtml(value) {
+      return String(value == null ? '' : value).replace(/[&<>'"]/g, function (char) {
+        return {'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[char];
+      });
+    }
+
+    function toast(message, isError) {
+      var item = document.createElement('div');
+      item.className = 'toast ' + (isError ? 'error' : 'ok');
+      item.textContent = message;
+      document.getElementById('toasts').appendChild(item);
+      window.setTimeout(function () { item.remove(); }, 3300);
+    }
+
+    function request(url, options) {
+      options = options || {};
+      options.headers = options.headers || {};
+      if (options.method === 'POST') {
+        options.headers['Content-Type'] = 'application/json';
+        options.headers['X-WebUI-Request'] = '1';
+      }
+      return fetch(url, options).then(function (response) {
+        return response.json().then(function (data) {
+          if (!response.ok || !data.ok) throw new Error(data.error || '요청에 실패했습니다.');
+          return data;
+        });
+      });
+    }
+
+    function renderControl(field) {
+      var value = state.values[field.key] == null || state.values[field.key] === '' ? field.default : state.values[field.key];
+      var disabled = field.readOnly || !state.offroad;
+      if (field.type === 'bool') {
+        return '<label class="switch"><input class="bool-input" type="checkbox" data-key="' + escapeHtml(field.key) + '" ' +
+          (String(value) === '1' ? 'checked ' : '') + (disabled ? 'disabled' : '') + '><span class="slider"></span></label>';
+      }
+      var multiline = field.type === 'text' && (String(value).length > 60 || String(value).indexOf('\n') !== -1);
+      var input = multiline
+        ? '<textarea class="text-value" data-key="' + escapeHtml(field.key) + '" ' + (disabled ? 'disabled' : '') + '>' + escapeHtml(value) + '</textarea>'
+        : '<input class="text-value" type="' + (field.type === 'number' ? 'number' : 'text') + '" data-key="' + escapeHtml(field.key) + '" value="' + escapeHtml(value) + '" ' + (disabled ? 'disabled' : '') + '>';
+      return input + (field.readOnly ? '' : '<button class="save-button" data-save="' + escapeHtml(field.key) + '" ' + (!state.offroad ? 'disabled' : '') + '>저장</button>');
+    }
+
+    function renderField(field) {
+      return '<div class="setting" data-search="' + escapeHtml((field.title + ' ' + field.key + ' ' + field.description).toLowerCase()) + '">' +
+        '<div><div class="setting-title">' + escapeHtml(field.title) + '<span class="setting-key">' + escapeHtml(field.key) + '</span></div>' +
+        (field.description ? '<div class="setting-desc">' + escapeHtml(field.description) + '</div>' : '') + '</div>' +
+        '<div class="control">' + renderControl(field) + '</div></div>';
+    }
+
+    function renderActions() {
+      var disabled = state.offroad ? '' : 'disabled';
+      return '<div class="action-grid">' +
+        '<button class="action-button" data-action="refresh" ' + disabled + '>UI 새로고침</button>' +
+        '<button class="action-button" data-action="reset_calibration" ' + disabled + '>캘리브레이션 초기화</button>' +
+        '<button class="action-button" data-action="reboot" ' + disabled + '>기기 재부팅</button>' +
+        '<button class="action-button danger" data-action="shutdown" ' + disabled + '>기기 전원 끄기</button>' +
+        '</div>';
+    }
+
+    function render() {
+      nav.innerHTML = state.sections.map(function (section) {
+        return '<button class="nav-button ' + (section.id === state.active ? 'active' : '') + '" data-section="' + section.id + '">' +
+          escapeHtml(section.title) + '<small>' + section.fields.length + '</small></button>';
+      }).join('');
+
+      content.innerHTML = state.sections.map(function (section) {
+        var fields = section.fields.length ? '<div class="settings-list">' + section.fields.map(renderField).join('') + '</div>' : '<div class="empty">표시할 설정이 없습니다.</div>';
+        return '<section class="section ' + (section.id === state.active ? 'active' : '') + '" data-id="' + section.id + '">' +
+          '<div class="section-head"><h2>' + escapeHtml(section.title) + '</h2>' +
+          (section.description ? '<p>' + escapeHtml(section.description) + '</p>' : '') + '</div>' +
+          fields + (section.actions ? renderActions() : '') + '<div class="search-empty">검색 결과가 없습니다.</div></section>';
+      }).join('');
+
+      badge.textContent = state.offroad ? '정차 · 변경 가능' : '주행 중 · 읽기 전용';
+      badge.className = 'badge ' + (state.offroad ? 'offroad' : 'onroad');
+      bindEvents();
+      filterSettings();
+    }
+
+    function bindEvents() {
+      Array.prototype.forEach.call(document.querySelectorAll('[data-section]'), function (button) {
+        button.addEventListener('click', function () {
+          state.active = button.getAttribute('data-section');
+          render();
+          window.scrollTo(0, 0);
+        });
+      });
+      Array.prototype.forEach.call(document.querySelectorAll('.bool-input'), function (input) {
+        input.addEventListener('change', function () {
+          saveParam(input.getAttribute('data-key'), input.checked ? '1' : '0', input);
+        });
+      });
+      Array.prototype.forEach.call(document.querySelectorAll('[data-save]'), function (button) {
+        button.addEventListener('click', function () {
+          var key = button.getAttribute('data-save');
+          var input = document.querySelector('.text-value[data-key="' + key + '"]');
+          saveParam(key, input.value, button);
+        });
+      });
+      Array.prototype.forEach.call(document.querySelectorAll('.text-value'), function (input) {
+        input.addEventListener('keydown', function (event) {
+          if (event.key === 'Enter' && input.tagName !== 'TEXTAREA') {
+            document.querySelector('[data-save="' + input.getAttribute('data-key') + '"]').click();
+          }
+        });
+      });
+      Array.prototype.forEach.call(document.querySelectorAll('[data-action]'), function (button) {
+        button.addEventListener('click', function () { runAction(button.getAttribute('data-action'), button); });
+      });
+    }
+
+    function saveParam(key, value, control) {
+      control.disabled = true;
+      request('/api/param', {method:'POST', body:JSON.stringify({key:key, value:value})})
+        .then(function (data) {
+          state.values[key] = data.value;
+          toast(key + ' 저장 완료');
+          if (key === 'WebUIEnabled' && data.value === '0') toast('WebUI가 곧 종료됩니다. 다시 켜려면 C2 화면의 네트워크 설정을 사용하세요.');
+        })
+        .catch(function (error) {
+          toast(error.message, true);
+          if (control.classList.contains('bool-input')) control.checked = !control.checked;
+        })
+        .then(function () { control.disabled = false; });
+    }
+
+    function runAction(action, button) {
+      var messages = {
+        refresh: 'C2 UI를 새로고침할까요?',
+        reset_calibration: '캘리브레이션과 LiveParameters를 초기화할까요?',
+        reboot: 'C2를 지금 재부팅할까요?',
+        shutdown: 'C2의 전원을 지금 끌까요?'
+      };
+      if (!window.confirm(messages[action] || '이 작업을 실행할까요?')) return;
+      button.disabled = true;
+      request('/api/action', {method:'POST', body:JSON.stringify({action:action})})
+        .then(function () { toast('작업 요청을 전달했습니다.'); })
+        .catch(function (error) { toast(error.message, true); button.disabled = false; });
+    }
+
+    function filterSettings() {
+      var term = search.value.trim().toLowerCase();
+      var active = document.querySelector('.section.active');
+      if (!active) return;
+      var visible = 0;
+      Array.prototype.forEach.call(active.querySelectorAll('.setting'), function (item) {
+        var show = !term || item.getAttribute('data-search').indexOf(term) !== -1;
+        item.classList.toggle('hidden', !show);
+        if (show) visible += 1;
+      });
+      var empty = active.querySelector('.search-empty');
+      if (empty) empty.style.display = term && visible === 0 ? 'block' : 'none';
+    }
+
+    function loadSettings(quiet) {
+      return request('/api/settings').then(function (data) {
+        state.sections = data.sections;
+        state.values = data.values;
+        state.offroad = data.offroad;
+        if (!state.sections.some(function (s) { return s.id === state.active; })) state.active = state.sections[0].id;
+        render();
+        if (!quiet) toast('C2 설정을 불러왔습니다.');
+      }).catch(function (error) {
+        badge.textContent = '연결 오류'; badge.className = 'badge onroad';
+        content.innerHTML = '<div class="empty">' + escapeHtml(error.message) + '</div>';
+        if (!quiet) toast(error.message, true);
+      });
+    }
+
+    search.addEventListener('input', filterSettings);
+    document.getElementById('reload').addEventListener('click', function () { loadSettings(false); });
+    loadSettings(true);
+  </script>
+</body>
+</html>

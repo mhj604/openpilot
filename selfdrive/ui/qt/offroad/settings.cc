@@ -419,6 +419,13 @@ C2NetworkPanel::C2NetworkPanel(QWidget *parent) : QWidget(parent) {
   ipaddress = new LabelControl(tr("IP Address"), "");
   list->addItem(ipaddress);
 
+  list->addItem(new ParamControl(
+    "WebUIEnabled",
+    tr("Enable WebUI"),
+    tr("Allow changing C2 settings from a web browser on port 8086. Local network and Tailscale access only."),
+    "../assets/offroad/icon_shell.png",
+    this));
+
   list->addItem(new HotspotOnBootToggle());
 
   // SSH key management
