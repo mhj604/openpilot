@@ -111,7 +111,8 @@ static int hyundai_community_rx_hook(CANPacket_t *to_push) {
     }
 
     // cruise control for car without SCC
-    if (addr == 1265 && bus == 0 && HKG_scc_bus == -1 && !OP_SCC_live) {
+    if (addr == 1265 && bus == 0 && HKG_scc_bus == -1 &&
+        (!OP_SCC_live || HKG_no_camera)) {
       // first byte
       int cruise_engaged = (GET_BYTES_04(to_push) & 0x7);
       // enable on res+ or set- buttons press
