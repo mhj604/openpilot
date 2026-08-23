@@ -83,6 +83,12 @@ if [ ! -f "/data/openpilot/selfdrive/modeld/models/supercombo.onnx" ]; then
     cat /data/openpilot/selfdrive/modeld/models/supercombo.onnxa* > /data/openpilot/selfdrive/modeld/models/supercombo.onnx
 fi
 
+# Temporary bench/vehicle passive-CAN mode.
+# When the external marker exists, manager must not start pandad/boardd.
+if [ -f "/data/panda_rxonly" ]; then
+    export BLOCK="${BLOCK:+$BLOCK,}pandad"
+fi
+
 export PASSIVE="0"
 exec ./launch_chffrplus.sh
 
