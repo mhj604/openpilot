@@ -105,24 +105,29 @@ static int hyundai_community_rx_hook(CANPacket_t *to_push) {
       uint32_t cyl_pres_raw = ((GET_BYTES_04(to_push) >> 26) & 0x3FU) |
                               ((GET_BYTE(to_push, 4) & 0x3FU) << 6);
       HKG_brake_pressed = cyl_pres_raw > 0U;
-      if (HKG_brake_pressed) {
+    }
+
+    // Synchronize lateral authorization with the actual conventional-cruise
+    // main state: byte 6 is 0 when off, 4 in standby, and 12 when active.
+    if (HKG_no_camera && addr == 1429 && bus == 0) {
+      bool cruise_main = (GET_BYTE(to_push, 6) & 0x4U) != 0U;
+      if (!cruise_main) {
         controls_allowed = 0;
+      } else if (!controls_allowed && !HKG_brake_pressed) {
+        controls_allowed = 1;
       }
     }
 
     // cruise control for car without SCC
     if (addr == 1265 && bus == 0 && HKG_scc_bus == -1 &&
-        (!OP_SCC_live || HKG_no_camera)) {
-      // first byte
-      int cruise_engaged = (GET_BYTES_04(to_push) & 0x7);
-      // enable on res+ or set- buttons press
-      if (!controls_allowed &&
-          (!HKG_no_camera || !HKG_brake_pressed) &&
-          (cruise_engaged == 1 || cruise_engaged == 2)) {
+        !OP_SCC_live && !HKG_no_camera) {
+      int cruise_button = GET_BYTES_04(to_push) & 0x7;
+
+      // Other no-SCC ports retain RES/SET enable and CANCEL disable.
+      if (!controls_allowed && (cruise_button == 1 || cruise_button == 2)) {
         controls_allowed = 1;
       }
-      // disable on cancel press
-      if (cruise_engaged == 4) {
+      if (cruise_button == 4) {
         controls_allowed = 0;
       }
     }

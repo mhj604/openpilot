@@ -1520,6 +1520,11 @@ BO_ 882 ELECT_GEAR: 8 XXX
  SG_ Elect_Gear_Shifter_NEXO : 16|16@1+ (1,0) [0|65535] ""  CLU
  SG_ Elect_Gear_Step : 22|3@0+ (1,0) [0|7] "" XXX
  SG_ Elect_Motor_Speed : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ Cruise_Set_Speed : 32|8@1+ (1,0) [0|255] "km/h or MPH" XXX
+
+BO_ 1429 CRUISE_STATUS: 8 XXX
+ SG_ Cruise_Main : 50|1@1+ (1,0) [0|1] "" XXX
+ SG_ Cruise_Active : 51|1@1+ (1,0) [0|1] "" XXX
 
 BO_ 881 E_EMS11: 8 XXX
  SG_ Brake_Pedal_Pos : 0|8@1+ (1,0) [0|127] "" XXX

@@ -52,9 +52,10 @@ class CarInterface(CarInterfaceBase):
     ret.radarOffCan = ret.sccBus == -1
     ret.standStill = False
 
-    # Enable openpilot longitudinal control when RadarDisable is enabled.
-    # The no-MFC Grandeur keeps its dedicated community safety parameter and CAN routing.
-    ret.openpilotLongitudinalControl = Params().get_bool("RadarDisable") or ret.sccBus == 2
+    # The no-SCC Grandeur uses its stock conventional cruise through RES/SET
+    # button control. It cannot accept synthetic SCC acceleration commands.
+    grandeur_no_scc = candidate == CAR.GRANDEUR_HEV_IG and ret.sccBus == -1
+    ret.openpilotLongitudinalControl = False if grandeur_no_scc else (Params().get_bool("RadarDisable") or ret.sccBus == 2)
 
 
 
@@ -304,8 +305,9 @@ class CarInterface(CarInterfaceBase):
     elif self.CC.scc_live and not self.CP.pcmCruise:
       self.CP.pcmCruise = True
 
-    # most HKG cars has no long control, it is safer and easier to engage by main on
-    if self.ufc_mode_enabled:
+    # Preserve the real conventional-cruise state on the no-SCC Grandeur.
+    # UFC's available-as-enabled behavior is only valid for the other ports.
+    if self.ufc_mode_enabled and not self.no_mfc:
       ret.cruiseState.enabled = ret.cruiseState.available
 
     buttonEvents = []
@@ -339,9 +341,19 @@ class CarInterface(CarInterfaceBase):
     if self.no_mfc and ret.gearShifter != car.CarState.GearShifter.drive:
       events.add(EventName.wrongGear)
 
-    # Brake must inhibit engagement and disengage lateral control.
-    if self.no_mfc and ret.brakePressed:
+    # In lateral-only mode, braking controls speed and must not disengage
+    # steering. Still inhibit a new engagement while the brake is held.
+    if self.no_mfc and ret.brakePressed and not c.enabled:
       events.add(EventName.pedalPressed)
+
+    # Keep lateral control synchronized to the stock cruise-main state rather
+    # than button edges. This also recovers automatically when cruise main was
+    # enabled while the brake was held.
+    if self.no_mfc:
+      if ret.cruiseState.available and not c.enabled and not ret.brakePressed:
+        events.add(EventName.buttonEnable)
+      elif not ret.cruiseState.available and c.enabled:
+        events.add(EventName.buttonCancel)
 
     if self.CC.longcontrol and self.CS.brake_error:
       events.add(EventName.brakeUnavailable)
@@ -424,14 +436,15 @@ class CarInterface(CarInterfaceBase):
 
   # handle button presses
     for b in ret.buttonEvents:
+      if self.no_mfc:
+        # Stock cruise state above owns lateral engagement. Cruise buttons only
+        # operate the vehicle's conventional cruise system.
+        continue
+
       # do disable on button down
       if b.type == ButtonType.cancel and b.pressed:
         events.add(EventName.buttonCancel)
-      if self.no_mfc:
-        # No-SCC lateral-only: SET/RES release enables openpilot.
-        if b.type in (ButtonType.accelCruise, ButtonType.decelCruise) and not b.pressed:
-          events.add(EventName.buttonEnable)
-      elif self.CC.longcontrol and not self.CC.scc_live:
+      if self.CC.longcontrol and not self.CC.scc_live:
         # do enable on both accel and decel buttons
         if b.type in (ButtonType.accelCruise, ButtonType.decelCruise) and not b.pressed:
           events.add(EventName.buttonEnable)

@@ -28,6 +28,7 @@ class CarState(CarStateBase):
     #Auto detection for setup
     self.no_radar = CP.sccBus == -1
     self.no_mfc = CP.carFingerprint == CAR.GRANDEUR_HEV_IG and self.no_radar
+    self.stock_conventional_cruise = CP.carFingerprint == CAR.GRANDEUR_HEV_IG and self.no_radar
     self.lkas_button_on = True
     self.cruise_main_button = 0
     self.mdps_error_cnt = 0
@@ -197,7 +198,12 @@ class CarState(CarStateBase):
     self.mdps_error_cnt += 1 if cp_mdps.vl["MDPS12"]["CF_Mdps_ToiUnavail"] != 0 else -self.mdps_error_cnt
     ret.steerFaultTemporary = self.mdps_error_cnt > 100 #cp_mdps.vl["MDPS12"]["CF_Mdps_ToiUnavail"] != 0
 
-    self.VSetDis = cp_scc.vl["SCC11"]["VSetDis"]
+    if self.stock_conventional_cruise:
+      self.VSetDis = cp.vl["ELECT_GEAR"]["Cruise_Set_Speed"]
+    elif self.no_radar:
+      self.VSetDis = cp.vl["LVR12"]["CF_Lvr_CruiseSet"]
+    else:
+      self.VSetDis = cp_scc.vl["SCC11"]["VSetDis"]
     ret.vSetDis = self.VSetDis
     self.clu_Vanz = cp.vl["CLU11"]["CF_Clu_Vanz"]
     lead_objspd = cp_scc.vl["SCC11"]["ACC_ObjRelSpd"]
@@ -210,17 +216,23 @@ class CarState(CarStateBase):
       self.driverAcc_time -= 1
 
     # cruise state
-    ret.cruiseState.enabled = (cp_scc.vl["SCC12"]["ACCMode"] != 0) if not self.no_radar else \
-                                      cp.vl["LVR12"]["CF_Lvr_CruiseSet"] != 0
-    ret.cruiseState.available = (cp_scc.vl["SCC11"]["MainMode_ACC"] != 0) if not self.no_radar else \
-                                      cp.vl["EMS16"]["CRUISE_LAMP_M"] != 0
+    if self.stock_conventional_cruise:
+      ret.cruiseState.enabled = cp.vl["CRUISE_STATUS"]["Cruise_Active"] != 0
+      ret.cruiseState.available = cp.vl["CRUISE_STATUS"]["Cruise_Main"] != 0
+    elif self.no_radar:
+      ret.cruiseState.enabled = cp.vl["LVR12"]["CF_Lvr_CruiseSet"] != 0
+      ret.cruiseState.available = cp.vl["EMS16"]["CRUISE_LAMP_M"] != 0
+    else:
+      ret.cruiseState.enabled = cp_scc.vl["SCC12"]["ACCMode"] != 0
+      ret.cruiseState.available = cp_scc.vl["SCC11"]["MainMode_ACC"] != 0
 
     ret.cruiseState.standstill = cp_scc.vl["SCC11"]["SCCInfoDisplay"] == 4. if not self.no_radar else False
     self.cruiseState_standstill = ret.cruiseState.standstill
     self.is_set_speed_in_mph = bool(cp.vl["CLU11"]["CF_Clu_SPEED_UNIT"])
     ret.isMph = self.is_set_speed_in_mph
     
-    self.acc_active = (cp_scc.vl["SCC12"]['ACCMode'] != 0)
+    self.acc_active = (cp_scc.vl["SCC12"]['ACCMode'] != 0) if not self.no_radar else \
+                                      ret.cruiseState.enabled
     self.cruise_active = self.acc_active
     if self.cruise_active:
       self.brake_check = False
@@ -235,7 +247,7 @@ class CarState(CarStateBase):
     if ret.cruiseState.enabled and (self.brake_check == False or self.cancel_check == False):
       speed_conv = CV.MPH_TO_MS if self.is_set_speed_in_mph else CV.KPH_TO_MS
       ret.cruiseState.speed = set_speed * speed_conv if not self.no_radar else \
-                                         cp.vl["LVR12"]["CF_Lvr_CruiseSet"] * speed_conv
+                                         self.VSetDis * speed_conv
     else:
       ret.cruiseState.speed = 0
 
@@ -548,6 +560,12 @@ class CarState(CarStateBase):
       ("CGW4", 5),
       ("WHL_SPD11", 50)
     ]
+    if CP.carFingerprint == CAR.GRANDEUR_HEV_IG and CP.sccBus == -1:
+      signals += [
+        ("Cruise_Set_Speed", "ELECT_GEAR"),
+        ("Cruise_Main", "CRUISE_STATUS"),
+        ("Cruise_Active", "CRUISE_STATUS")
+      ]
     if CP.sccBus == 0 and CP.pcmCruise:
       checks += [
         ("SCC11", 50),

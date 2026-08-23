@@ -95,9 +95,10 @@ class CarController():
     self.params = Params()
     self.no_scc = CP.sccBus == -1
     self.mode_change_switch = int(self.params.get("CruiseStatemodeSelInit", encoding="utf8"))
-    self.opkr_variablecruise = self.params.get_bool("OpkrVariableCruise") and not self.no_scc
+    # No-SCC Grandeur controls its stock conventional cruise with RES/SET.
+    self.opkr_variablecruise = self.params.get_bool("OpkrVariableCruise") or self.no_scc
     self.opkr_autoresume = self.params.get_bool("OpkrAutoResume") and not self.no_scc
-    self.opkr_cruisegap_auto_adj = self.params.get_bool("CruiseGapAdjust")
+    self.opkr_cruisegap_auto_adj = self.params.get_bool("CruiseGapAdjust") and not self.no_scc
     self.opkr_cruise_auto_res = self.params.get_bool("CruiseAutoRes") and not self.no_scc
     self.opkr_cruise_auto_res_option = int(self.params.get("AutoResOption", encoding="utf8"))
     self.opkr_cruise_auto_res_condition = int(self.params.get("AutoResCondition", encoding="utf8"))
@@ -561,7 +562,7 @@ class CarController():
     elif self.last_lead_distance != 0:
       self.last_lead_distance = 0
       self.standstill_res_button = False
-    elif self.opkr_variablecruise and CS.acc_active:
+    elif self.opkr_variablecruise and CS.acc_active and (enabled or not self.no_scc):
       btn_signal = self.NC.update(CS, path_plan)
       self.on_speed_control = self.NC.onSpeedControl
       self.on_speed_bump_control = self.NC.onSpeedBumpControl
@@ -1149,7 +1150,7 @@ class CarController():
         accel = clip(accel, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX)
         self.aq_value = accel
         self.aq_value_raw = aReqValue
-        can_sends.append(create_scc11(self.packer, frame, set_speed, lead_visible, self.scc_live, self.dRel, self.vRel, self.yRel, 
+        can_sends.append(create_scc11(self.packer, frame, setSpeed, lead_visible, self.scc_live, self.dRel, self.vRel, self.yRel, 
          self.car_fingerprint, CS.out.vEgo * CV.MS_TO_KPH, self.acc_standstill, self.gapsettingdance, self.stopped, radar_recog, CS.scc11))
         if (CS.brake_check or CS.cancel_check) and self.car_fingerprint not in (CAR.NIRO_EV_DE, CAR.AVANTE_AD):
           can_sends.append(create_scc12(self.packer, accel, enabled, self.scc_live, CS.out.gasPressed, 1, 
