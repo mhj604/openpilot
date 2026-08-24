@@ -339,7 +339,7 @@ class VehicleActivity:
     self.lock = threading.Lock()
     self.moving = True
     self.engaged = True
-    self.gear = "unknown"
+    self.stationary_since = 0.0
     self.last_update = 0.0
     self.thread: Optional[threading.Thread] = None
 
@@ -357,8 +357,12 @@ class VehicleActivity:
           updated = False
           with self.lock:
             if sm.updated["carState"]:
-              self.moving = abs(sm["carState"].vEgo) > 0.1
-              self.gear = str(sm["carState"].gearShifter)
+              moving = abs(sm["carState"].vEgo) > 0.1
+              if moving:
+                self.stationary_since = 0.0
+              elif self.moving or self.stationary_since == 0.0:
+                self.stationary_since = time.monotonic()
+              self.moving = moving
               updated = True
             if sm.updated["controlsState"]:
               self.engaged = sm["controlsState"].enabled
@@ -369,10 +373,11 @@ class VehicleActivity:
         print("webui: vehicle state monitor restarting:", error)
         time.sleep(1)
 
-  def snapshot(self) -> Tuple[bool, bool, str, bool]:
+  def snapshot(self) -> Tuple[bool, bool, float, bool]:
     with self.lock:
       fresh = time.monotonic() - self.last_update < 5.0
-      return self.moving, self.engaged, self.gear, fresh
+      stationary_for = time.monotonic() - self.stationary_since if self.stationary_since > 0.0 else 0.0
+      return self.moving, self.engaged, stationary_for, fresh
 
 
 VEHICLE_ACTIVITY = VehicleActivity()
@@ -407,16 +412,16 @@ def modification_status(params: Params) -> Tuple[bool, str]:
   if is_offroad(params):
     return True, "offroad"
 
-  moving, engaged, gear, fresh = VEHICLE_ACTIVITY.snapshot()
+  moving, engaged, stationary_for, fresh = VEHICLE_ACTIVITY.snapshot()
   if not fresh:
     return False, "unknown"
   if engaged:
     return False, "engaged"
   if moving:
     return False, "moving"
-  if gear != "park":
-    return False, "gear"
-  return True, "parked"
+  if stationary_for < 2.0:
+    return False, "settling"
+  return True, "stopped"
 
 
 def current_values(params: Params) -> Dict[str, str]:
@@ -519,7 +524,7 @@ class WebUIHandler(BaseHTTPRequestHandler):
     params = Params()
     editable, _ = modification_status(params)
     if not editable:
-      self._json(409, {"ok": False, "error": "P단 정차 상태에서만 설정을 변경할 수 있습니다."})
+      self._json(409, {"ok": False, "error": "속도 0 상태가 2초 이상 유지되고 OP가 꺼져 있어야 설정을 변경할 수 있습니다."})
       return
 
     if self.path == "/api/param":
