@@ -11,6 +11,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple
 
+import cereal.messaging as messaging
 from common.basedir import BASEDIR
 from common.params import Params
 
@@ -333,6 +334,44 @@ def build_schema() -> Tuple[List[Dict[str, Any]], Dict[str, Dict[str, Any]]]:
 SECTIONS, FIELDS = build_schema()
 
 
+class VehicleActivity:
+  def __init__(self) -> None:
+    self.lock = threading.Lock()
+    self.moving = True
+    self.engaged = True
+    self.last_update = 0.0
+    self.thread = threading.Thread(target=self._run, daemon=True)
+    self.thread.start()
+
+  def _run(self) -> None:
+    while True:
+      try:
+        sm = messaging.SubMaster(["carState", "controlsState"])
+        while True:
+          sm.update(1000)
+          updated = False
+          with self.lock:
+            if sm.updated["carState"]:
+              self.moving = abs(sm["carState"].vEgo) > 0.1
+              updated = True
+            if sm.updated["controlsState"]:
+              self.engaged = sm["controlsState"].enabled
+              updated = True
+            if updated:
+              self.last_update = time.monotonic()
+      except Exception as error:
+        print("webui: vehicle state monitor restarting:", error)
+        time.sleep(1)
+
+  def snapshot(self) -> Tuple[bool, bool, bool]:
+    with self.lock:
+      fresh = time.monotonic() - self.last_update < 5.0
+      return self.moving, self.engaged, fresh
+
+
+VEHICLE_ACTIVITY = VehicleActivity()
+
+
 def decode_param(value: Optional[bytes]) -> str:
   if value is None:
     return ""
@@ -356,6 +395,20 @@ def is_offroad(params: Params) -> bool:
     return params.get_bool("IsOffroad")
   except Exception:
     return False
+
+
+def modification_status(params: Params) -> Tuple[bool, str]:
+  if is_offroad(params):
+    return True, "offroad"
+
+  moving, engaged, fresh = VEHICLE_ACTIVITY.snapshot()
+  if not fresh:
+    return False, "unknown"
+  if engaged:
+    return False, "engaged"
+  if moving:
+    return False, "moving"
+  return True, "parked"
 
 
 def current_values(params: Params) -> Dict[str, str]:
@@ -429,9 +482,12 @@ class WebUIHandler(BaseHTTPRequestHandler):
 
     if self.path == "/api/settings":
       params = Params()
+      editable, vehicle_state = modification_status(params)
       self._json(200, {
         "ok": True,
         "offroad": is_offroad(params),
+        "editable": editable,
+        "vehicleState": vehicle_state,
         "sections": SECTIONS,
         "values": current_values(params),
         "port": PORT,
@@ -453,8 +509,9 @@ class WebUIHandler(BaseHTTPRequestHandler):
       return
 
     params = Params()
-    if not is_offroad(params):
-      self._json(409, {"ok": False, "error": "주행 중에는 설정을 변경할 수 없습니다."})
+    editable, _ = modification_status(params)
+    if not editable:
+      self._json(409, {"ok": False, "error": "차량 이동 중이거나 OP 제어 중에는 설정을 변경할 수 없습니다."})
       return
 
     if self.path == "/api/param":

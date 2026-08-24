@@ -194,7 +194,7 @@
 
   <script>
     'use strict';
-    var state = { sections: [], values: {}, offroad: false, active: 'device' };
+    var state = { sections: [], values: {}, offroad: false, editable: false, vehicleState: 'unknown', active: 'device' };
     var nav = document.getElementById('nav');
     var content = document.getElementById('content');
     var search = document.getElementById('search');
@@ -231,7 +231,7 @@
 
     function renderControl(field) {
       var value = state.values[field.key] == null || state.values[field.key] === '' ? field.default : state.values[field.key];
-      var disabled = field.readOnly || !state.offroad;
+      var disabled = field.readOnly || !state.editable;
       if (field.type === 'bool') {
         return '<label class="switch"><input class="bool-input" type="checkbox" data-key="' + escapeHtml(field.key) + '" ' +
           (String(value) === '1' ? 'checked ' : '') + (disabled ? 'disabled' : '') + '><span class="slider"></span></label>';
@@ -240,7 +240,7 @@
       var input = multiline
         ? '<textarea class="text-value" data-key="' + escapeHtml(field.key) + '" ' + (disabled ? 'disabled' : '') + '>' + escapeHtml(value) + '</textarea>'
         : '<input class="text-value" type="' + (field.type === 'number' ? 'number' : 'text') + '" data-key="' + escapeHtml(field.key) + '" value="' + escapeHtml(value) + '" ' + (disabled ? 'disabled' : '') + '>';
-      return input + (field.readOnly ? '' : '<button class="save-button" data-save="' + escapeHtml(field.key) + '" ' + (!state.offroad ? 'disabled' : '') + '>저장</button>');
+      return input + (field.readOnly ? '' : '<button class="save-button" data-save="' + escapeHtml(field.key) + '" ' + (!state.editable ? 'disabled' : '') + '>저장</button>');
     }
 
     function renderField(field) {
@@ -251,7 +251,7 @@
     }
 
     function renderActions() {
-      var disabled = state.offroad ? '' : 'disabled';
+      var disabled = state.editable ? '' : 'disabled';
       return '<div class="action-grid">' +
         '<button class="action-button" data-action="refresh" ' + disabled + '>UI 새로고침</button>' +
         '<button class="action-button" data-action="reset_calibration" ' + disabled + '>캘리브레이션 초기화</button>' +
@@ -274,8 +274,10 @@
           fields + (section.actions ? renderActions() : '') + '<div class="search-empty">검색 결과가 없습니다.</div></section>';
       }).join('');
 
-      badge.textContent = state.offroad ? '정차 · 변경 가능' : '주행 중 · 읽기 전용';
-      badge.className = 'badge ' + (state.offroad ? 'offroad' : 'onroad');
+      var badgeText = state.editable ? '정차 · 변경 가능' :
+        (state.vehicleState === 'unknown' ? '차량 상태 확인 중 · 읽기 전용' : '이동/제어 중 · 읽기 전용');
+      badge.textContent = badgeText;
+      badge.className = 'badge ' + (state.editable ? 'offroad' : 'onroad');
       bindEvents();
       filterSettings();
     }
@@ -360,6 +362,8 @@
         state.sections = data.sections;
         state.values = data.values;
         state.offroad = data.offroad;
+        state.editable = data.editable;
+        state.vehicleState = data.vehicleState;
         if (!state.sections.some(function (s) { return s.id === state.active; })) state.active = state.sections[0].id;
         render();
         if (!quiet) toast('C2 설정을 불러왔습니다.');
