@@ -274,8 +274,8 @@
           fields + (section.actions ? renderActions() : '') + '<div class="search-empty">검색 결과가 없습니다.</div></section>';
       }).join('');
 
-      var badgeText = state.editable ? 'OP 비활성 · 변경 가능' :
-        (state.vehicleState === 'unknown' ? '차량 상태 확인 중 · 읽기 전용' : 'OP 제어 중 · 읽기 전용');
+      var badgeText = state.editable ? 'P단 정차 · 변경 가능' :
+        (state.vehicleState === 'unknown' ? '차량 상태 확인 중 · 읽기 전용' : 'P단 정차 필요 · 읽기 전용');
       badge.textContent = badgeText;
       badge.className = 'badge ' + (state.editable ? 'offroad' : 'onroad');
       bindEvents();

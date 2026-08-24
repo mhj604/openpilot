@@ -11,6 +11,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple
 
+import cereal.messaging as messaging
 from common.basedir import BASEDIR
 from common.params import Params
 
@@ -333,6 +334,50 @@ def build_schema() -> Tuple[List[Dict[str, Any]], Dict[str, Dict[str, Any]]]:
 SECTIONS, FIELDS = build_schema()
 
 
+class VehicleActivity:
+  def __init__(self) -> None:
+    self.lock = threading.Lock()
+    self.moving = True
+    self.engaged = True
+    self.gear = "unknown"
+    self.last_update = 0.0
+    self.thread: Optional[threading.Thread] = None
+
+  def start(self) -> None:
+    if self.thread is None or not self.thread.is_alive():
+      self.thread = threading.Thread(target=self._run, daemon=True)
+      self.thread.start()
+
+  def _run(self) -> None:
+    while True:
+      try:
+        sm = messaging.SubMaster(["carState", "controlsState"])
+        while True:
+          sm.update(1000)
+          updated = False
+          with self.lock:
+            if sm.updated["carState"]:
+              self.moving = abs(sm["carState"].vEgo) > 0.1
+              self.gear = str(sm["carState"].gearShifter)
+              updated = True
+            if sm.updated["controlsState"]:
+              self.engaged = sm["controlsState"].enabled
+              updated = True
+            if updated:
+              self.last_update = time.monotonic()
+      except Exception as error:
+        print("webui: vehicle state monitor restarting:", error)
+        time.sleep(1)
+
+  def snapshot(self) -> Tuple[bool, bool, str, bool]:
+    with self.lock:
+      fresh = time.monotonic() - self.last_update < 5.0
+      return self.moving, self.engaged, self.gear, fresh
+
+
+VEHICLE_ACTIVITY = VehicleActivity()
+
+
 def decode_param(value: Optional[bytes]) -> str:
   if value is None:
     return ""
@@ -362,13 +407,16 @@ def modification_status(params: Params) -> Tuple[bool, str]:
   if is_offroad(params):
     return True, "offroad"
 
-  try:
-    engaged = params.get_bool("IsEngaged")
-  except Exception:
+  moving, engaged, gear, fresh = VEHICLE_ACTIVITY.snapshot()
+  if not fresh:
     return False, "unknown"
   if engaged:
     return False, "engaged"
-  return True, "disengaged"
+  if moving:
+    return False, "moving"
+  if gear != "park":
+    return False, "gear"
+  return True, "parked"
 
 
 def current_values(params: Params) -> Dict[str, str]:
@@ -471,7 +519,7 @@ class WebUIHandler(BaseHTTPRequestHandler):
     params = Params()
     editable, _ = modification_status(params)
     if not editable:
-      self._json(409, {"ok": False, "error": "OP 제어 중에는 설정을 변경할 수 없습니다."})
+      self._json(409, {"ok": False, "error": "P단 정차 상태에서만 설정을 변경할 수 있습니다."})
       return
 
     if self.path == "/api/param":
@@ -539,6 +587,9 @@ def run_server() -> None:
 
 
 def main() -> None:
+  # process_config preimports modules in manager before forking. Start the
+  # messaging thread here so it belongs to the actual WebUI child process.
+  VEHICLE_ACTIVITY.start()
   while True:
     try:
       if Params().get_bool("WebUIEnabled"):
