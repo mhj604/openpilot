@@ -108,6 +108,162 @@ BOOL_HINTS = {
   "EndToEndToggle", "SshEnabled", "WebUIEnabled",
 }
 
+# Additional help for values whose raw Params representation differs from the
+# value used by controls. Existing Qt descriptions/translations are used first.
+PARAM_HELP: Dict[str, Dict[str, str]] = {
+  # Driving
+  "OpkrAutoResume": {"description": "순정 SCC 정차 상태에서 자동으로 RES 신호를 보내 출발합니다."},
+  "RESCountatStandstill": {"description": "정차 후 자동 출발 시 전송할 RES 버튼 메시지 횟수입니다.", "unit": "count"},
+  "CruiseGapAdjust": {"description": "정차 시 크루즈 차간거리 단계를 자동으로 줄였다가 출발 후 복원합니다."},
+  "CruiseGapBySpdOn": {"description": "차량 속도 구간에 따라 순정 크루즈 차간거리 단계를 변경합니다."},
+  "CruiseGapBySpdSpd": {"description": "차간거리 단계를 바꿀 속도 경계값 목록입니다.", "unit": "km/h", "hint": "쉼표로 구분"},
+  "CruiseGapBySpdGap": {"description": "각 속도 구간에 적용할 차간거리 단계 목록입니다.", "unit": "level", "hint": "쉼표로 구분"},
+  "StandstillResumeAlt": {"description": "일반 자동 출발이 동작하지 않는 차량에서 대체 RES 전송 방식을 사용합니다."},
+  "DepartChimeAtResume": {"description": "RES로 출발할 때 알림음을 재생합니다."},
+  "OpkrVariableCruise": {"description": "순정 크루즈 버튼을 자동 전송해 목표 속도에 맞춰 가감속을 보조합니다."},
+  "VarCruiseSpeedFactor": {"description": "가변 크루즈 속도 보정 강도입니다.", "unit": "%"},
+  "CruiseSetwithRoadLimitSpeedEnabled": {"description": "도로 제한속도를 기준으로 크루즈 설정속도를 맞춥니다."},
+  "CruiseSetwithRoadLimitSpeedOffset": {"description": "도로 제한속도에 더할 크루즈 설정속도 보정값입니다.", "unit": "km/h"},
+  "CruiseStatemodeSelInit": {"description": "크루즈 모드의 부팅 시 기본 선택값입니다.", "unit": "enum"},
+  "OpkrLaneChangeSpeed": {"description": "자동 차선 변경을 허용하는 최저 차량 속도입니다.", "unit": "km/h"},
+  "OpkrAutoLaneChangeDelay": {"description": "방향지시등 입력 후 자동 차선 변경을 시작하기까지의 지연 설정입니다.", "unit": "step"},
+  "LCTimingFactorEnable": {"description": "속도별 차선 변경 타이밍 보정값을 사용합니다."},
+  "LCTimingFactor30": {"description": "30km/h 부근 차선 변경 타이밍 배율입니다.", "unit": "ratio", "hint": "raw × 0.01"},
+  "LCTimingFactor60": {"description": "60km/h 부근 차선 변경 타이밍 배율입니다.", "unit": "ratio", "hint": "raw × 0.01"},
+  "LCTimingFactor80": {"description": "80km/h 부근 차선 변경 타이밍 배율입니다.", "unit": "ratio", "hint": "raw × 0.01"},
+  "LCTimingFactor110": {"description": "110km/h 부근 차선 변경 타이밍 배율입니다.", "unit": "ratio", "hint": "raw × 0.01"},
+  "LeftCurvOffsetAdj": {"description": "좌회전 곡선에서 경로를 좌우로 보정하는 값입니다.", "unit": "offset"},
+  "RightCurvOffsetAdj": {"description": "우회전 곡선에서 경로를 좌우로 보정하는 값입니다.", "unit": "offset"},
+  "OpkrSteerAngleCorrection": {"description": "차량에서 수신한 조향각의 영점을 보정합니다.", "unit": "deg", "hint": "raw × 0.1 = deg"},
+  "OpkrTurnSteeringDisable": {"description": "저속에서 방향지시등을 켜면 조향 보조를 일시 정지합니다."},
+  "CruiseOverMaxSpeed": {"description": "현재 속도가 설정속도를 넘으면 설정속도를 현재 속도에 맞춥니다."},
+  "OSMEnable": {"description": "OpenStreetMap 도로 정보를 사용합니다."},
+  "OSMSpeedLimitEnable": {"description": "OpenStreetMap의 도로 제한속도 정보를 사용합니다."},
+  "StockNaviSpeedEnabled": {"description": "차량 순정 내비게이션의 안전구간 속도 정보를 사용합니다."},
+  "OpkrSpeedLimitOffset": {"description": "제한속도 제어에 추가할 보정값입니다.", "unit": "km/h or %"},
+  "OSMCustomSpeedLimitC": {"description": "OSM 제한속도 보정의 입력 속도 구간입니다.", "unit": "km/h", "hint": "쉼표로 구분"},
+  "OSMCustomSpeedLimitT": {"description": "각 OSM 속도 구간에 적용할 목표 속도입니다.", "unit": "km/h", "hint": "쉼표로 구분"},
+  "SafetyCamDecelDistGain": {"description": "안전카메라 감속을 시작하는 거리에 더할 보정값입니다.", "unit": "distance offset"},
+  "CurvDecelOption": {"description": "곡률 감속에 사용할 데이터 조합을 선택합니다.", "unit": "enum"},
+  "VCurvSpeedC": {"description": "비전 곡률 감속의 기준 곡률 목록입니다.", "unit": "curvature index", "hint": "쉼표로 구분"},
+  "VCurvSpeedT": {"description": "비전 곡률별 목표 속도 목록입니다.", "unit": "km/h", "hint": "쉼표로 구분"},
+  "OCurvSpeedC": {"description": "OSM 곡률 감속의 기준 곡률 목록입니다.", "unit": "curvature index", "hint": "쉼표로 구분"},
+  "OCurvSpeedT": {"description": "OSM 곡률별 목표 속도 목록입니다.", "unit": "km/h", "hint": "쉼표로 구분"},
+  "OPKRSpeedBump": {"description": "과속방지턱 구간에서 목표 속도를 낮춥니다."},
+  "OPKREarlyStop": {"description": "선행차 정지 상황에서 차간거리 신호를 이용해 더 일찍 감속합니다."},
+  "AutoEnable": {"description": "크루즈 대기 상태에서 조건이 맞으면 OP를 자동 활성화합니다."},
+  "AutoEnableSpeed": {"description": "자동 OP 활성화를 허용할 속도 기준입니다.", "unit": "km/h or mode"},
+  "CruiseAutoRes": {"description": "주행 중 브레이크로 크루즈가 대기 상태가 되면 자동으로 RES를 수행합니다."},
+  "AutoResOption": {"description": "자동 RES가 이전 설정속도를 복원하는 방식을 선택합니다.", "unit": "enum"},
+  "AutoResCondition": {"description": "자동 RES를 시작할 페달 또는 차량 조건을 선택합니다.", "unit": "enum"},
+  "AutoResLimitTime": {"description": "브레이크 해제 후 자동 RES를 허용할 제한시간입니다.", "unit": "s"},
+  "AutoRESDelay": {"description": "자동 RES 실행 전 대기시간입니다.", "unit": "s"},
+  "LaneWidth": {"description": "차선 모델이 사용할 기본 차로 폭입니다.", "unit": "m", "hint": "raw × 0.1 = m"},
+  "SpdLaneWidthSpd": {"description": "속도별 차로 폭을 전환할 속도 구간입니다.", "unit": "km/h", "hint": "쉼표로 구분"},
+  "SpdLaneWidthSet": {"description": "각 속도 구간에서 사용할 차로 폭입니다.", "unit": "m", "hint": "쉼표로 구분"},
+  "RoutineDriveOn": {"description": "도로명에 따라 오프셋과 제한속도 설정을 자동 적용합니다."},
+  "RoutineDriveOption": {"description": "도로명 기반 루틴 주행에 사용할 공급자를 선택합니다.", "unit": "enum"},
+  "CloseToRoadEdge": {"description": "가장자리 차로에서 차량 경로를 도로 가장자리 쪽으로 보정합니다."},
+  "LeftEdgeOffset": {"description": "왼쪽 도로 가장자리에서 사용할 경로 보정값입니다.", "unit": "m"},
+  "RightEdgeOffset": {"description": "오른쪽 도로 가장자리에서 사용할 경로 보정값입니다.", "unit": "m"},
+  "AvoidLKASFaultEnabled": {"description": "차량별 최대 조향각을 넘지 않도록 LKAS 명령을 제한합니다."},
+  "AvoidLKASFaultMaxAngle": {"description": "LKAS 오류 방지를 시작할 최대 조향각입니다.", "unit": "deg"},
+  "AvoidLKASFaultMaxFrame": {"description": "최대 조향각 상태를 허용할 CAN 프레임 수입니다.", "unit": "frame"},
+  "SpeedCameraOffset": {"description": "속도에 따라 카메라 오프셋을 추가 보정합니다."},
+
+  # Tuning
+  "CameraOffsetAdj": {"description": "차량 중심 대비 카메라 위치를 좌우로 보정합니다. 양수는 왼쪽, 음수는 오른쪽입니다.", "unit": "m", "hint": "raw × 0.001 = m"},
+  "PathOffsetAdj": {"description": "계획 경로 전체를 좌우로 이동합니다. 양수는 왼쪽, 음수는 오른쪽입니다.", "unit": "m", "hint": "raw × 0.001 = m"},
+  "SteerActuatorDelayAdj": {"description": "조향 명령부터 실제 차량 반응까지의 지연시간입니다.", "unit": "s", "hint": "raw × 0.01 = s"},
+  "TireStiffnessFactorAdj": {"description": "차량 모델의 타이어 횡강성 배율입니다.", "unit": "ratio", "hint": "raw × 0.01"},
+  "SteerThreshold": {"description": "운전자 조향 개입으로 판단할 토크 기준값입니다.", "unit": "torque count"},
+  "SteerLimitTimerAdj": {"description": "조향 출력 제한 상태를 허용하는 시간입니다.", "unit": "s", "hint": "raw × 0.01 = s"},
+  "OpkrLiveSteerRatio": {"description": "학습된 실시간 조향비를 차량 모델에 사용합니다."},
+  "LiveSteerRatioPercent": {"description": "학습된 실시간 조향비에 추가할 비율 보정입니다.", "unit": "%"},
+  "SteerRatioAdj": {"description": "차량 모델이 사용할 기본 조향비입니다.", "unit": "ratio", "hint": "raw × 0.01"},
+  "SteerRatioMaxAdj": {"description": "가변 조향비가 올라갈 수 있는 최대값입니다.", "unit": "ratio", "hint": "raw × 0.01"},
+  "OpkrVariableSteerMax": {"description": "모델 곡률에 따라 최대 조향 출력을 가변 적용합니다."},
+  "SteerMaxBaseAdj": {"description": "기본 최대 조향 출력값입니다.", "unit": "Panda torque count"},
+  "SteerMaxAdj": {"description": "가변 제어에서 허용할 최대 조향 출력값입니다.", "unit": "Panda torque count"},
+  "OpkrVariableSteerDelta": {"description": "모델 곡률에 따라 조향 출력 변화율을 가변 적용합니다."},
+  "SteerDeltaUpBaseAdj": {"description": "기본 조향 출력 증가 제한값입니다.", "unit": "count/frame"},
+  "SteerDeltaUpAdj": {"description": "가변 제어의 최대 조향 출력 증가 제한값입니다.", "unit": "count/frame"},
+  "SteerDeltaDownBaseAdj": {"description": "기본 조향 출력 감소 제한값입니다.", "unit": "count/frame"},
+  "SteerDeltaDownAdj": {"description": "가변 제어의 최대 조향 출력 감소 제한값입니다.", "unit": "count/frame"},
+  "AvoidLKASFaultBeyond": {"description": "추가 조향 설정을 사용할 때 LKAS 오류 방지 범위를 확장합니다."},
+  "DesiredCurvatureLimit": {"description": "목표 곡률 변화율에 적용할 제한 배율입니다.", "unit": "ratio", "hint": "raw × 0.01"},
+  "OpkrLiveTunePanelEnable": {"description": "지원되는 횡제어 게인과 오프셋을 주행 프로세스가 주기적으로 다시 읽도록 합니다."},
+  "LateralControlMethod": {"description": "사용할 횡방향 제어기(PID, INDI, LQR, Torque)를 선택합니다.", "unit": "enum"},
+  "PidKp": {"description": "PID 횡제어의 비례 게인입니다.", "unit": "gain", "hint": "raw × 0.01"},
+  "PidKi": {"description": "PID 횡제어의 적분 게인입니다.", "unit": "gain", "hint": "raw × 0.001"},
+  "PidKd": {"description": "PID 횡제어의 미분 게인입니다.", "unit": "gain", "hint": "raw × 0.01"},
+  "PidKf": {"description": "PID 횡제어의 피드포워드 게인입니다.", "unit": "gain", "hint": "raw × 0.00001"},
+  "TorqueKp": {"description": "토크 횡제어의 비례 게인입니다.", "unit": "gain", "hint": "raw × 0.1 ÷ max lateral accel"},
+  "TorqueKi": {"description": "토크 횡제어의 적분 게인입니다.", "unit": "gain", "hint": "raw × 0.1 ÷ max lateral accel"},
+  "TorqueKf": {"description": "토크 횡제어의 피드포워드 게인입니다.", "unit": "gain", "hint": "raw × 0.1 ÷ max lateral accel"},
+  "TorqueFriction": {"description": "조향계 마찰을 보상할 토크값입니다.", "unit": "torque", "hint": "raw × 0.001"},
+  "TorqueMaxLatAccel": {"description": "토크 제어 정규화에 사용할 최대 횡가속도입니다.", "unit": "m/s²", "hint": "raw × 0.1"},
+  "TorqueAngDeadZone": {"description": "토크 제어에서 무시할 조향각 오차 범위입니다.", "unit": "deg", "hint": "raw × 0.1 = deg"},
+  "TorqueUseAngle": {"description": "토크 제어의 실제 곡률 계산에 조향각 센서를 사용합니다."},
+  "InnerLoopGain": {"description": "INDI 제어기의 내부 루프 게인입니다.", "unit": "gain", "hint": "raw × 0.1"},
+  "OuterLoopGain": {"description": "INDI 제어기의 외부 루프 게인입니다.", "unit": "gain", "hint": "raw × 0.1"},
+  "TimeConstant": {"description": "INDI 액추에이터 모델의 시간상수입니다.", "unit": "s", "hint": "raw × 0.1 = s"},
+  "ActuatorEffectiveness": {"description": "INDI 모델의 조향 액추에이터 효과 계수입니다.", "unit": "factor", "hint": "raw × 0.1"},
+  "Scale": {"description": "LQR 제어기의 전체 출력 스케일입니다.", "unit": "scale"},
+  "LqrKi": {"description": "LQR 제어기의 적분 게인입니다.", "unit": "gain", "hint": "raw × 0.001"},
+  "DcGain": {"description": "LQR 제어기의 정상상태 DC 게인입니다.", "unit": "gain", "hint": "raw × 0.00001"},
+  "StoppingDist": {"description": "종방향 제어가 정지 단계에 진입하는 선행차 거리 기준입니다.", "unit": "m", "hint": "raw × 0.1 = m"},
+  "StoppingDistAdj": {"description": "정지 시 레이더 기준거리보다 여유 있게 멈추도록 정지거리를 보정합니다."},
+}
+
+LIVE_1S_KEYS = {"CameraOffsetAdj", "PathOffsetAdj", "OpkrLiveSteerRatio", "LiveSteerRatioPercent", "SpeedLimitDecelOff"}
+LIVE_3S_KEYS = {"PidKp", "PidKi", "PidKd", "PidKf", "TorqueKp", "TorqueKi", "TorqueKf", "TorqueFriction", "TorqueMaxLatAccel", "TorqueAngDeadZone", "TorqueUseAngle", "InnerLoopGain", "OuterLoopGain", "TimeConstant", "ActuatorEffectiveness", "Scale", "LqrKi", "DcGain"}
+REBOOT_KEYS = {"LateralControlMethod", "OSMEnable", "OSMSpeedLimitEnable", "MapboxEnabled", "RTShield", "C2WithCommaPower", "OPKRNaviSelect"}
+
+
+def infer_unit(key: str, field_kind: str) -> str:
+  if field_kind == "bool":
+    return "ON / OFF"
+  if field_kind == "text":
+    return "text"
+  if re.search(r"(?:Speed|Spd)$|SpeedC$|SpeedT$", key):
+    return "km/h"
+  if re.search(r"Angle|Ang", key):
+    return "deg"
+  if re.search(r"Percent|Offset$", key):
+    return "%"
+  if re.search(r"Count", key):
+    return "count"
+  if re.search(r"Delay|Time|Timer|Wait", key):
+    return "time"
+  if re.search(r"MaxFrame|Frame", key):
+    return "frame"
+  return "value"
+
+
+def infer_description(key: str, title: str, field_kind: str) -> str:
+  if field_kind == "bool":
+    return f"{title} 기능을 켜거나 끕니다."
+  if key.endswith(("Spd", "Speed")):
+    return f"{title}에 사용할 속도 기준값입니다."
+  if key.endswith(("Option", "Select", "Method", "Mode")):
+    return f"{title}의 동작 방식을 선택하는 번호입니다."
+  if "," in key:
+    return f"{title} 설정값입니다."
+  return f"{title}에 사용하는 설정값입니다."
+
+
+def infer_apply(key: str, read_only: bool) -> str:
+  if read_only:
+    return "읽기 전용"
+  if key in LIVE_1S_KEYS:
+    return "LiveTune 약 1초"
+  if key in LIVE_3S_KEYS:
+    return "LiveTune 약 3초"
+  if key in REBOOT_KEYS:
+    return "재부팅 필요"
+  return "UI 새로고침 권장"
+
 
 def read_text(path: Path) -> str:
   try:
@@ -251,14 +407,26 @@ def build_schema() -> Tuple[List[Dict[str, Any]], Dict[str, Dict[str, Any]]]:
     if key not in known_keys or key in NEVER_EXPOSE_KEYS:
       return None
     default = defaults.get(key, "")
+    resolved_title = translated(title, translations) if title else humanize_key(key)
+    resolved_description = translated(description, translations) if description else ""
+    kind = field_type(key, default, bool_keys)
+    read_only = key not in editable_keys
+    help_info = PARAM_HELP.get(key, {})
+    if help_info.get("description"):
+      resolved_description = help_info["description"]
+    if not resolved_description:
+      resolved_description = infer_description(key, resolved_title, kind)
     field = {
       "key": key,
-      "title": translated(title, translations) if title else humanize_key(key),
-      "description": translated(description, translations) if description else "",
-      "type": field_type(key, default, bool_keys),
+      "title": resolved_title,
+      "description": resolved_description,
+      "type": kind,
       "default": default,
-      "readOnly": key not in editable_keys,
+      "readOnly": read_only,
       "source": class_name,
+      "unit": help_info.get("unit", infer_unit(key, kind)),
+      "hint": help_info.get("hint", "쉼표로 구분" if "," in default else ""),
+      "apply": infer_apply(key, read_only),
     }
     fields[key] = field
     return field
