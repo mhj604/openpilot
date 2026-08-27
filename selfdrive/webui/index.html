@@ -104,6 +104,7 @@
     }
     .meta-chip.unit { border-color: rgba(0, 211, 138, .28); color: var(--green); }
     .meta-chip.apply { border-color: rgba(255, 156, 54, .28); color: #dba36c; }
+    .meta-chip.apply.reboot { border-color: rgba(255, 82, 82, .5); background: rgba(255, 82, 82, .12); color: #ff7b7b; }
     .meta-chip.hint { color: #929aa2; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
     .setting-effect {
       margin-top: 10px; padding: 10px 12px; border-left: 3px solid #4d78a8;
@@ -259,8 +260,9 @@
     }
 
     function renderField(field) {
+      var applyClass = field.apply === 'C2 재부팅 후 적용' ? ' reboot' : '';
       var meta = '<div class="setting-meta"><span class="meta-chip unit">UNIT · ' + escapeHtml(field.unit) + '</span>' +
-        '<span class="meta-chip apply">APPLY · ' + escapeHtml(field.apply) + '</span>' +
+        '<span class="meta-chip apply' + applyClass + '">APPLY · ' + escapeHtml(field.apply) + '</span>' +
         (field.hint ? '<span class="meta-chip hint">' + escapeHtml(field.hint) + '</span>' : '') + '</div>';
       var effect = '<div class="setting-effect"><span class="effect-label">CHANGE EFFECT</span>' + escapeHtml(field.effect) + '</div>';
       return '<div class="setting" data-search="' + escapeHtml((field.title + ' ' + field.key + ' ' + field.description + ' ' + field.effect + ' ' + field.unit + ' ' + field.apply).toLowerCase()) + '">' +

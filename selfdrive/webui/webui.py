@@ -330,7 +330,7 @@ def infer_apply(key: str, read_only: bool) -> str:
   if key in LIVE_3S_KEYS:
     return "LiveTune 약 3초"
   if key in REBOOT_KEYS:
-    return "재부팅 필요"
+    return "C2 재부팅 후 적용"
   return "UI 새로고침 권장"
 
 
