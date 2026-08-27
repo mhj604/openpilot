@@ -105,6 +105,12 @@
     .meta-chip.unit { border-color: rgba(0, 211, 138, .28); color: var(--green); }
     .meta-chip.apply { border-color: rgba(255, 156, 54, .28); color: #dba36c; }
     .meta-chip.hint { color: #929aa2; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .setting-effect {
+      margin-top: 10px; padding: 10px 12px; border-left: 3px solid #4d78a8;
+      border-radius: 5px 10px 10px 5px; background: rgba(62, 106, 154, .12);
+      color: #b8c8da; font-size: 12px; line-height: 1.55;
+    }
+    .effect-label { margin-right: 7px; color: #72a5da; font-size: 10px; font-weight: 800; letter-spacing: .5px; }
     .control { display: flex; justify-content: flex-end; align-items: center; gap: 8px; min-width: 0; }
     .text-value {
       width: 100%; min-height: 43px; border: 1px solid #343a40; border-radius: 12px;
@@ -256,9 +262,10 @@
       var meta = '<div class="setting-meta"><span class="meta-chip unit">UNIT · ' + escapeHtml(field.unit) + '</span>' +
         '<span class="meta-chip apply">APPLY · ' + escapeHtml(field.apply) + '</span>' +
         (field.hint ? '<span class="meta-chip hint">' + escapeHtml(field.hint) + '</span>' : '') + '</div>';
-      return '<div class="setting" data-search="' + escapeHtml((field.title + ' ' + field.key + ' ' + field.description + ' ' + field.unit + ' ' + field.apply).toLowerCase()) + '">' +
+      var effect = '<div class="setting-effect"><span class="effect-label">CHANGE EFFECT</span>' + escapeHtml(field.effect) + '</div>';
+      return '<div class="setting" data-search="' + escapeHtml((field.title + ' ' + field.key + ' ' + field.description + ' ' + field.effect + ' ' + field.unit + ' ' + field.apply).toLowerCase()) + '">' +
         '<div><div class="setting-title">' + escapeHtml(field.title) + '<span class="setting-key">' + escapeHtml(field.key) + '</span></div>' +
-        '<div class="setting-desc">' + escapeHtml(field.description) + '</div>' + meta + '</div>' +
+        '<div class="setting-desc">' + escapeHtml(field.description) + '</div>' + meta + effect + '</div>' +
         '<div class="control">' + renderControl(field) + '</div></div>';
     }
 

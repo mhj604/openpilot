@@ -216,6 +216,75 @@ PARAM_HELP: Dict[str, Dict[str, str]] = {
   "StoppingDistAdj": {"description": "정지 시 레이더 기준거리보다 여유 있게 멈추도록 정지거리를 보정합니다."},
 }
 
+PARAM_EFFECT: Dict[str, str] = {
+  # Driving
+  "RESCountatStandstill": "높이면 RES 메시지를 더 많이 보내 출발 성공 가능성이 올라가지만 버튼 스팸이 늘어납니다. 낮추면 전송이 줄지만 차량이 RES를 놓칠 수 있습니다.",
+  "CruiseGapBySpdSpd": "각 숫자를 높이면 해당 차간거리 단계로 전환되는 속도가 늦어집니다. 구간은 낮은 속도부터 오름차순이어야 합니다.",
+  "CruiseGapBySpdGap": "숫자를 높이면 해당 속도 구간의 순정 차간거리 단계가 커져 더 멀리 따라갑니다. 낮추면 더 가깝게 따라갑니다.",
+  "VarCruiseSpeedFactor": "높이면 종방향 계획에서 더 먼 미래의 목표속도를 참조해 감속을 더 일찍 예상할 수 있습니다. 너무 높으면 반응이 둔하거나 과도하게 선행할 수 있습니다.",
+  "CruiseSetwithRoadLimitSpeedOffset": "높이면 도로 제한속도보다 높은 크루즈 속도가 설정되고, 낮추거나 음수로 하면 더 낮게 설정됩니다.",
+  "OpkrLaneChangeSpeed": "높이면 더 빠른 속도에서만 자동 차선 변경이 허용됩니다. 낮추면 저속에서도 허용되지만 저속 조향이 급해질 수 있습니다.",
+  "OpkrAutoLaneChangeDelay": "값은 강도가 아니라 지연 모드입니다. 0은 즉시/Nudge 방식이고 이후 단계는 약 0.2, 0.5, 1.0, 1.5, 2.0초 순으로 지연이 늘어납니다.",
+  "LCTimingFactor30": "높이면 30km/h 부근에서 차선 확률을 더 빨리 줄여 차선 변경 진행이 빨라집니다. 낮추면 더 부드럽고 느려집니다.",
+  "LCTimingFactor60": "높이면 60km/h 부근에서 차선 변경 진행이 빨라지고, 낮추면 더 부드럽고 느려집니다.",
+  "LCTimingFactor80": "높이면 80km/h 부근에서 차선 변경 진행이 빨라지고, 낮추면 더 부드럽고 느려집니다.",
+  "LCTimingFactor110": "높이면 110km/h 부근에서 차선 변경 진행이 빨라지고, 낮추면 더 부드럽고 느려집니다.",
+  "LeftCurvOffsetAdj": "좌곡선에서 음수는 경로를 왼쪽, 양수는 오른쪽으로 보정합니다. 절댓값이 커질수록 이동량이 커집니다.",
+  "RightCurvOffsetAdj": "우곡선에서 음수는 경로를 왼쪽, 양수는 오른쪽으로 보정합니다. 절댓값이 커질수록 이동량이 커집니다.",
+  "OpkrSteerAngleCorrection": "양수를 높이면 수신 조향각에서 더 큰 값을 빼므로 OP가 보는 조향각이 작아집니다. 음수는 반대로 커집니다. 잘못 맞추면 직진 오프셋이 생깁니다.",
+  "OpkrSpeedLimitOffset": "양수를 높이면 제한속도 대비 목표속도가 올라가고, 음수로 낮추면 목표속도가 내려갑니다. Offset Option에 따라 km/h 또는 %로 해석됩니다.",
+  "OSMCustomSpeedLimitT": "목표값을 높이면 해당 OSM 속도 구간을 더 빠르게 통과하고, 낮추면 더 보수적으로 감속합니다.",
+  "VCurvSpeedT": "목표값을 높이면 같은 비전 곡률에서 코너 통과속도가 높아지고, 낮추면 더 많이 감속합니다.",
+  "OCurvSpeedT": "목표값을 높이면 같은 OSM 곡률에서 코너 통과속도가 높아지고, 낮추면 더 많이 감속합니다.",
+  "SafetyCamDecelDistGain": "높이면 안전카메라 감속을 더 먼 거리에서 시작하고, 낮추면 더 가까이에서 시작합니다.",
+  "AutoEnableSpeed": "높이면 더 높은 속도에 도달해야 자동 활성화됩니다. 낮추면 저속에서 활성화되며 특수 음수값은 별도 조건 모드로 사용될 수 있습니다.",
+  "AutoResLimitTime": "높이면 브레이크 해제 후 자동 RES를 허용하는 시간이 길어지고, 0은 시간 제한 없음으로 사용됩니다.",
+  "AutoRESDelay": "높이면 자동 RES가 늦게 실행되고, 낮추면 더 빨리 실행됩니다.",
+  "LaneWidth": "높이면 모델이 더 넓은 차로를 가정하고, 낮추면 더 좁게 가정합니다. 실제 차로와 다르면 중앙 경로가 흔들릴 수 있습니다.",
+  "SpdLaneWidthSpd": "높이면 각 차로 폭 설정으로 전환되는 속도가 늦어집니다. 값은 오름차순으로 입력해야 합니다.",
+  "SpdLaneWidthSet": "높이면 해당 속도 구간에서 더 넓은 차로를 가정하고, 낮추면 더 좁게 가정합니다.",
+  "LeftEdgeOffset": "절댓값을 높이면 왼쪽 도로 가장자리 감지 시 경로 이동량이 커집니다. 부호를 바꾸면 이동 방향이 반대가 됩니다.",
+  "RightEdgeOffset": "절댓값을 높이면 오른쪽 도로 가장자리 감지 시 경로 이동량이 커집니다. 부호를 바꾸면 이동 방향이 반대가 됩니다.",
+  "AvoidLKASFaultMaxAngle": "높이면 더 큰 조향각까지 LKAS 명령을 유지하고, 낮추면 더 일찍 제한합니다. 차량 허용각보다 높으면 LKAS 오류 가능성이 커집니다.",
+  "AvoidLKASFaultMaxFrame": "높이면 큰 조향각 명령을 더 오래 유지하고, 낮추면 더 빨리 해제합니다. 너무 높으면 LKAS 오류 가능성이 커집니다.",
+
+  # Tuning
+  "CameraOffsetAdj": "양수를 높이면 인식 경로가 왼쪽으로, 음수 절댓값을 높이면 오른쪽으로 이동합니다. 과도하면 한쪽 차선에 치우칩니다.",
+  "PathOffsetAdj": "양수를 높이면 최종 주행 경로가 왼쪽으로, 음수 절댓값을 높이면 오른쪽으로 이동합니다. CameraOffset과 효과가 겹칠 수 있습니다.",
+  "SteerActuatorDelayAdj": "높이면 차량 조향 반응이 느리다고 가정해 제어가 더 일찍 선행합니다. 너무 높으면 코너 진입이 빠르거나 진동할 수 있고, 너무 낮으면 조향이 늦습니다.",
+  "TireStiffnessFactorAdj": "높이면 타이어가 더 단단하고 같은 조향에 더 잘 회전한다고 가정합니다. 너무 높으면 조향이 부족할 수 있고, 너무 낮으면 과도한 조향이나 진동이 생길 수 있습니다.",
+  "SteerThreshold": "낮추면 작은 핸들 힘에도 운전자 개입으로 판단해 OP 조향이 쉽게 양보합니다. 높이면 더 강한 힘이 필요합니다. 너무 높으면 운전자 개입 반응이 늦을 수 있습니다.",
+  "SteerLimitTimerAdj": "높이면 조향 출력 포화 상태를 더 오래 허용한 뒤 경고하고, 낮추면 포화 경고가 더 빨리 발생합니다.",
+  "LiveSteerRatioPercent": "양수를 높이면 학습 조향비를 키워 같은 곡률에 더 큰 조향각을 요구하고, 음수는 줄입니다. 과도하면 코너 안쪽/바깥쪽 편향이나 진동이 생길 수 있습니다.",
+  "SteerRatioAdj": "높이면 같은 곡률에 더 큰 조향각을 요구해 조향 반응이 강해지고, 낮추면 조향각 요구가 줄어듭니다. 너무 높으면 과조향, 너무 낮으면 코너 바깥 밀림이 생길 수 있습니다.",
+  "SteerRatioMaxAdj": "높이면 가변 조향비가 더 크게 올라갈 수 있어 큰 조향각을 허용합니다. 낮추면 가변 조향비 상한이 줄어듭니다.",
+  "SteerMaxBaseAdj": "높이면 기본 최대 조향 토크가 강해지고, 낮추면 약해집니다. 너무 높으면 EPS 오류·진동·급조향 위험이 커집니다.",
+  "SteerMaxAdj": "높이면 가변 제어가 사용할 수 있는 최대 조향 토크가 강해지고, 낮추면 코너에서 조향 부족이 생길 수 있습니다.",
+  "SteerDeltaUpBaseAdj": "높이면 조향 토크가 더 빠르게 증가해 반응이 날카로워지고, 낮추면 부드럽지만 코너 진입이 늦을 수 있습니다.",
+  "SteerDeltaUpAdj": "높이면 가변 모드의 토크 상승속도가 빨라지고, 낮추면 더 부드럽게 상승합니다.",
+  "SteerDeltaDownBaseAdj": "높이면 조향 토크를 더 빨리 풀고, 낮추면 토크가 더 천천히 감소합니다. 너무 높으면 출렁임, 너무 낮으면 코너 탈출 지연이 생길 수 있습니다.",
+  "SteerDeltaDownAdj": "높이면 가변 모드에서 조향 토크를 더 빨리 해제하고, 낮추면 더 천천히 해제합니다.",
+  "DesiredCurvatureLimit": "높이면 목표 곡률이 더 빠르게 변해 조향 반응이 빨라지고, 낮추면 변화가 제한돼 부드러워집니다. 너무 높으면 급조향, 너무 낮으면 코너 추종 지연이 생깁니다.",
+  "PidKp": "높이면 현재 조향 오차에 즉시 더 강하게 반응합니다. 너무 높으면 좌우 진동, 너무 낮으면 코너 추종이 느려집니다.",
+  "PidKi": "높이면 지속적인 조향 오차를 더 빨리 없앱니다. 너무 높으면 적분 누적으로 흔들림이나 오버슈트가 생깁니다.",
+  "PidKd": "높이면 오차 변화에 제동을 걸어 급격한 움직임을 억제합니다. 너무 높으면 노이즈에 민감하고 조향이 거칠 수 있습니다.",
+  "PidKf": "높이면 목표 조향각에 비례한 선행 토크가 커집니다. 너무 높으면 코너 진입 과조향, 너무 낮으면 반응 지연이 생길 수 있습니다.",
+  "TorqueKp": "높이면 횡가속 오차에 더 강하게 반응합니다. 너무 높으면 진동, 너무 낮으면 경로 추종이 느려집니다.",
+  "TorqueKi": "높이면 남아 있는 횡가속 오차를 더 빨리 누적 보정합니다. 너무 높으면 오버슈트와 흔들림이 생길 수 있습니다.",
+  "TorqueKf": "높이면 목표 횡가속에 대한 선행 토크가 커집니다. 너무 높으면 코너 진입이 공격적이고, 너무 낮으면 늦게 따라갑니다.",
+  "TorqueFriction": "높이면 조향계 마찰을 뚫기 위한 최소 보상 토크가 커져 작은 곡률에도 잘 반응하지만 잔진동이 늘 수 있습니다. 낮추면 부드럽지만 데드존이 커질 수 있습니다.",
+  "TorqueMaxLatAccel": "다른 토크 게인이 같다면 높일수록 정규화된 Kp/Ki/Kf가 작아져 반응이 약해지고, 낮추면 강해집니다. 다른 토크 게인과 함께 조정해야 합니다.",
+  "TorqueAngDeadZone": "높이면 작은 조향각 오차를 무시해 잔진동이 줄지만 정밀도가 떨어집니다. 낮추면 작은 오차에도 반응합니다.",
+  "InnerLoopGain": "높이면 INDI 내부 조향 응답이 빨라지지만 진동 가능성이 커지고, 낮추면 부드럽지만 느려집니다.",
+  "OuterLoopGain": "높이면 목표 경로 오차를 더 적극적으로 보정하고, 낮추면 보정이 완만해집니다. 너무 높으면 오버슈트가 생길 수 있습니다.",
+  "TimeConstant": "높이면 액추에이터를 더 느린 시스템으로 가정해 제어가 완만해지고, 낮추면 더 빠른 시스템으로 가정합니다. 실제 차량 반응과 맞지 않으면 진동 또는 지연이 생깁니다.",
+  "ActuatorEffectiveness": "높이면 같은 명령이 더 큰 조향 효과를 낸다고 가정해 출력이 줄고, 낮추면 더 큰 출력을 요구합니다.",
+  "Scale": "높이면 LQR 최종 출력이 작아져 조향이 약해지고, 낮추면 출력이 커져 강해집니다.",
+  "LqrKi": "높이면 LQR의 지속 오차 보정이 강해지고, 낮추면 적분 보정이 약해집니다. 너무 높으면 오버슈트가 생깁니다.",
+  "DcGain": "높이면 LQR 목표각에 대한 선행 출력이 작아지고, 낮추면 커집니다. 너무 낮으면 공격적 조향이 될 수 있습니다.",
+  "StoppingDist": "높이면 더 먼 선행차 거리에서 정지 단계에 들어가 일찍 감속하고, 낮추면 더 가까이 접근한 뒤 감속합니다.",
+}
+
 LIVE_1S_KEYS = {"CameraOffsetAdj", "PathOffsetAdj", "OpkrLiveSteerRatio", "LiveSteerRatioPercent", "SpeedLimitDecelOff"}
 LIVE_3S_KEYS = {"PidKp", "PidKi", "PidKd", "PidKf", "TorqueKp", "TorqueKi", "TorqueKf", "TorqueFriction", "TorqueMaxLatAccel", "TorqueAngDeadZone", "TorqueUseAngle", "InnerLoopGain", "OuterLoopGain", "TimeConstant", "ActuatorEffectiveness", "Scale", "LqrKi", "DcGain"}
 REBOOT_KEYS = {"LateralControlMethod", "OSMEnable", "OSMSpeedLimitEnable", "MapboxEnabled", "RTShield", "C2WithCommaPower", "OPKRNaviSelect"}
@@ -263,6 +332,18 @@ def infer_apply(key: str, read_only: bool) -> str:
   if key in REBOOT_KEYS:
     return "재부팅 필요"
   return "UI 새로고침 권장"
+
+
+def infer_effect(key: str, field_kind: str, unit: str) -> str:
+  if key in PARAM_EFFECT:
+    return PARAM_EFFECT[key]
+  if field_kind == "bool":
+    return "ON이면 위 기능을 사용하고 OFF이면 사용하지 않습니다."
+  if unit in ("enum", "step", "level"):
+    return "숫자의 크기가 제어 강도를 뜻하지 않습니다. 번호에 따라 동작 모드 또는 단계를 선택합니다."
+  if field_kind == "text":
+    return "문자열을 바꾸면 이 값을 참조하는 기능의 입력 또는 목록이 변경됩니다. 형식을 유지해야 합니다."
+  return "값을 높이면 해당 기준값이 커지고 낮추면 작아집니다. 차량 동작에 미치는 방향은 위 설명과 함께 확인하세요."
 
 
 def read_text(path: Path) -> str:
@@ -416,6 +497,7 @@ def build_schema() -> Tuple[List[Dict[str, Any]], Dict[str, Dict[str, Any]]]:
       resolved_description = help_info["description"]
     if not resolved_description:
       resolved_description = infer_description(key, resolved_title, kind)
+    unit = help_info.get("unit", infer_unit(key, kind))
     field = {
       "key": key,
       "title": resolved_title,
@@ -424,9 +506,10 @@ def build_schema() -> Tuple[List[Dict[str, Any]], Dict[str, Dict[str, Any]]]:
       "default": default,
       "readOnly": read_only,
       "source": class_name,
-      "unit": help_info.get("unit", infer_unit(key, kind)),
+      "unit": unit,
       "hint": help_info.get("hint", "쉼표로 구분" if "," in default else ""),
       "apply": infer_apply(key, read_only),
+      "effect": infer_effect(key, kind, unit),
     }
     fields[key] = field
     return field
