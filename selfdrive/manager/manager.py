@@ -190,6 +190,7 @@ def manager_init() -> None:
     ("SpeedLimitDecelOff", "0"),
     ("CurvDecelOption", "2"),
     ("FCA11Message", "0"),
+    ("C2VisionCollisionWarning", "1"),
     ("StandstillResumeAlt", "0"),
     ("MapboxEnabled", "0"),
     ("AutoRESDelay", "1"),

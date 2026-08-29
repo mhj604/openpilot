@@ -42,6 +42,7 @@ PANEL_CLASSES = {
     "CruiseSetwithRoadLimitSpeed", "CruiseSetwithRoadLimitSpeedOffset",
     "CruisemodeSelInit", "LaneChangeSpeed", "LaneChangeDelay", "LCTimingFactorUD",
     "LCTimingFactor", "LeftCurvOffset", "RightCurvOffset", "BlindSpotDetectToggle",
+    "C2VisionCollisionWarningToggle",
     "CSteerWidget", "SteerAngleCorrection", "TurnSteeringDisableToggle",
     "CruiseOverMaxSpeedToggle", "OSMEnabledToggle", "OSMSpeedLimitEnabledToggle",
     "StockNaviSpeedToggle", "SpeedLimitOffset", "OSMCustomSpeedLimitUD",
@@ -134,6 +135,7 @@ PARAM_HELP: Dict[str, Dict[str, str]] = {
   "LCTimingFactor110": {"description": "110km/h 부근 차선 변경 타이밍 배율입니다.", "unit": "ratio", "hint": "raw × 0.01"},
   "LeftCurvOffsetAdj": {"description": "좌회전 곡선에서 경로를 좌우로 보정하는 값입니다.", "unit": "offset"},
   "RightCurvOffsetAdj": {"description": "우회전 곡선에서 경로를 좌우로 보정하는 값입니다.", "unit": "offset"},
+  "C2VisionCollisionWarning": {"description": "C2 비전 모델의 전방 충돌 경고와 레이더 없는 차량의 반복 제동 경고음을 사용합니다. OFF여도 차량의 순정 AEB 경고는 유지됩니다."},
   "OpkrSteerAngleCorrection": {"description": "차량에서 수신한 조향각의 영점을 보정합니다.", "unit": "deg", "hint": "raw × 0.1 = deg"},
   "OpkrTurnSteeringDisable": {"description": "저속에서 방향지시등을 켜면 조향 보조를 일시 정지합니다."},
   "CruiseOverMaxSpeed": {"description": "현재 속도가 설정속도를 넘으면 설정속도를 현재 속도에 맞춥니다."},
@@ -218,6 +220,7 @@ PARAM_HELP: Dict[str, Dict[str, str]] = {
 
 PARAM_EFFECT: Dict[str, str] = {
   # Driving
+  "C2VisionCollisionWarning": "ON이면 C2 비전 기반 전방 충돌 경고와 레이더 없는 차량용 반복 제동 경고를 표시·재생합니다. OFF이면 이 두 C2 경고만 끄며, 차량 순정 AEB 경고와 실제 제동 기능은 바뀌지 않습니다.",
   "RESCountatStandstill": "높이면 RES 메시지를 더 많이 보내 출발 성공 가능성이 올라가지만 버튼 스팸이 늘어납니다. 낮추면 전송이 줄지만 차량이 RES를 놓칠 수 있습니다.",
   "CruiseGapBySpdSpd": "각 숫자를 높이면 해당 차간거리 단계로 전환되는 속도가 늦어집니다. 구간은 낮은 속도부터 오름차순이어야 합니다.",
   "CruiseGapBySpdGap": "숫자를 높이면 해당 속도 구간의 순정 차간거리 단계가 커져 더 멀리 따라갑니다. 낮추면 더 가깝게 따라갑니다.",
@@ -285,7 +288,7 @@ PARAM_EFFECT: Dict[str, str] = {
   "StoppingDist": "높이면 더 먼 선행차 거리에서 정지 단계에 들어가 일찍 감속하고, 낮추면 더 가까이 접근한 뒤 감속합니다.",
 }
 
-LIVE_1S_KEYS = {"CameraOffsetAdj", "PathOffsetAdj", "OpkrLiveSteerRatio", "LiveSteerRatioPercent", "SpeedLimitDecelOff"}
+LIVE_1S_KEYS = {"CameraOffsetAdj", "PathOffsetAdj", "OpkrLiveSteerRatio", "LiveSteerRatioPercent", "SpeedLimitDecelOff", "C2VisionCollisionWarning"}
 LIVE_3S_KEYS = {"PidKp", "PidKi", "PidKd", "PidKf", "TorqueKp", "TorqueKi", "TorqueKf", "TorqueFriction", "TorqueMaxLatAccel", "TorqueAngDeadZone", "TorqueUseAngle", "InnerLoopGain", "OuterLoopGain", "TimeConstant", "ActuatorEffectiveness", "Scale", "LqrKi", "DcGain"}
 REBOOT_KEYS = {"LateralControlMethod", "OSMEnable", "OSMSpeedLimitEnable", "MapboxEnabled", "RTShield", "C2WithCommaPower", "OPKRNaviSelect"}
 

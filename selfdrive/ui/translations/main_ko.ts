@@ -3733,6 +3733,19 @@
     </message>
 </context>
 <context>
+    <name>C2VisionCollisionWarningToggle</name>
+    <message>
+        <location filename="../qt/widgets/opkr.h" line="232"/>
+        <source>C2 Forward Collision Warning</source>
+        <translation>C2 전방 충돌 경고</translation>
+    </message>
+    <message>
+        <location filename="../qt/widgets/opkr.h" line="232"/>
+        <source>Show and sound C2 vision-based collision warnings. Turn this off only to suppress repeated false warnings. Stock vehicle AEB warnings remain active.</source>
+        <translation>C2 비전 기반 전방 충돌 경고와 경고음을 사용합니다. 반복 오경보를 잠시 끌 때만 비활성화하세요. 차량의 순정 AEB 경고는 계속 유지됩니다.</translation>
+    </message>
+</context>
+<context>
     <name>FCA11MessageToggle</name>
     <message>
         <location filename="../qt/widgets/opkr.h" line="664"/>

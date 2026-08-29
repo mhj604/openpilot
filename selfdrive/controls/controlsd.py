@@ -79,6 +79,7 @@ class Controls:
       self.camera_packets.append("wideRoadCameraState")
 
     params = Params()
+    self.params = params
     self.joystick_mode = params.get_bool("JoystickDebugMode")
     joystick_packet = ['testJoystick'] if self.joystick_mode else []
 
@@ -119,6 +120,7 @@ class Controls:
     self.cruise_road_limit_spd_offset = int(params.get("CruiseSetwithRoadLimitSpeedOffset", encoding="utf8"))
     self.stock_lkas_on_disengaged_status = params.get_bool('StockLKASEnabled')
     self.no_mdps_mods = params.get_bool('NoSmartMDPS')
+    self.c2_vision_fcw_enabled = params.get_bool("C2VisionCollisionWarning")
 
     self.cruise_road_limit_spd_switch = True
     self.cruise_road_limit_spd_switch_prev = 0
@@ -444,10 +446,12 @@ class Controls:
         self.events.add(EventName.cruiseMismatch)
 
     # Check for FCW
+    if self.sm.frame % int(1. / DT_CTRL) == 0:
+      self.c2_vision_fcw_enabled = self.params.get_bool("C2VisionCollisionWarning")
     stock_long_is_braking = self.enabled and not self.CP.openpilotLongitudinalControl and CS.aEgo < -1.25
     model_fcw = self.sm['modelV2'].meta.hardBrakePredicted and not CS.brakePressed and not stock_long_is_braking
     planner_fcw = self.sm['longitudinalPlan'].fcw and self.enabled
-    if planner_fcw or model_fcw:
+    if self.c2_vision_fcw_enabled and (planner_fcw or model_fcw):
       self.events.add(EventName.fcw)
 
     if TICI:

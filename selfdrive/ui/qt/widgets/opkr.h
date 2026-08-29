@@ -229,6 +229,17 @@ public:
   }
 };
 
+class C2VisionCollisionWarningToggle : public ToggleControl {
+  Q_OBJECT
+
+public:
+  C2VisionCollisionWarningToggle() : ToggleControl(tr("C2 Forward Collision Warning"), tr("Show and sound C2 vision-based collision warnings. Turn this off only to suppress repeated false warnings. Stock vehicle AEB warnings remain active."), "../assets/offroad/icon_shell.png", Params().getBool("C2VisionCollisionWarning")) {
+    QObject::connect(this, &C2VisionCollisionWarningToggle::toggleFlipped, [=](int state) {
+      Params().putBool("C2VisionCollisionWarning", state != 0);
+    });
+  }
+};
+
 class UFCModeEnabledToggle : public ToggleControl {
   Q_OBJECT
 

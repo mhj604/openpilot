@@ -544,6 +544,7 @@ DrivingPanel::DrivingPanel(QWidget *parent) : QFrame(parent) {
   layout->addWidget(new LeftCurvOffset());
   layout->addWidget(new RightCurvOffset());
   layout->addWidget(new BlindSpotDetectToggle());
+  layout->addWidget(new C2VisionCollisionWarningToggle());
 
   layout->addWidget(new CSteerWidget());
   layout->addWidget(new SteerAngleCorrection());

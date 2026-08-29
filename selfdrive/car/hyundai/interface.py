@@ -22,8 +22,10 @@ class CarInterface(CarInterfaceBase):
 
     self.blinker_status = 0
     self.blinker_timer = 0
-    self.ufc_mode_enabled = Params().get_bool('UFCModeEnabled')
-    self.no_mdps_mods = Params().get_bool('NoSmartMDPS')
+    self.params = Params()
+    self.ufc_mode_enabled = self.params.get_bool('UFCModeEnabled')
+    self.no_mdps_mods = self.params.get_bool('NoSmartMDPS')
+    self.c2_vision_fcw_enabled = self.params.get_bool("C2VisionCollisionWarning")
     # This vehicle-specific branch supports the Grandeur IG HEV without MFC/SCC.
     self.no_mfc = CP.carFingerprint == CAR.GRANDEUR_HEV_IG and CP.sccBus == -1
 
@@ -363,7 +365,9 @@ class CarInterface(CarInterfaceBase):
     #   events.events.remove(EventName.pedalPressed)
     if ret.vEgo < self.CP.minSteerSpeed and self.no_mdps_mods:
       events.add(car.CarEvent.EventName.belowSteerSpeed)
-    if self.CC.need_brake and not self.CC.longcontrol:
+    if self.frame % 100 == 0:
+      self.c2_vision_fcw_enabled = self.params.get_bool("C2VisionCollisionWarning")
+    if self.c2_vision_fcw_enabled and self.CC.need_brake and not self.CC.longcontrol:
       events.add(EventName.needBrake)
     if not self.CC.lkas_temp_disabled:
       if self.CC.lanechange_manual_timer and ret.vEgo > 0.3:
