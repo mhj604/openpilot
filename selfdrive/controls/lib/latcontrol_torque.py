@@ -181,7 +181,11 @@ class LatControlTorque(LatControl):
       # convert friction into lateral accel units for feedforward
       friction_error = error + JERK_GAIN * desired_lateral_jerk
       friction = self.friction * self.max_lat_accel if modern_torque_control else self.friction
-      friction_compensation = interp(apply_deadzone(friction_error, lateral_accel_deadzone), [-FRICTION_THRESHOLD, FRICTION_THRESHOLD], [-friction, friction])
+      if modern_torque_control:
+        friction_input = 0.0 if abs(friction_error) < lateral_accel_deadzone else friction_error
+      else:
+        friction_input = apply_deadzone(friction_error, lateral_accel_deadzone)
+      friction_compensation = interp(friction_input, [-FRICTION_THRESHOLD, FRICTION_THRESHOLD], [-friction, friction])
       ff += friction_compensation if modern_torque_control else friction_compensation / self.kf
       freeze_integrator = CS.steeringRateLimited or CS.steeringPressed or CS.vEgo < 5
       controller_output = self.pid.update(error,
