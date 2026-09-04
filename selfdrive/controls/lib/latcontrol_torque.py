@@ -77,9 +77,8 @@ class LatControlTorque(LatControl):
       speed_kp = [gain * kp_scale for gain in KP_INTERP]
       kp = [INTERP_SPEEDS, speed_kp]
       ki = self.ki * self.max_lat_accel
-      torque_per_lat_accel = max(self.kf, 1e-3)
-      pid_limit = self.steer_max / torque_per_lat_accel
-      pid_kf = 1.0
+      pid_limit = max(self.max_lat_accel, 1e-3)
+      pid_kf = self.kf * self.max_lat_accel
     else:
       kp = self.kp
       ki = self.ki
@@ -101,14 +100,22 @@ class LatControlTorque(LatControl):
   def live_tune(self, CP):
     self.mpc_frame += 1
     if self.mpc_frame % 300 == 0:
-      self.max_lat_accel = float(Decimal(self.params.get("TorqueMaxLatAccel", encoding="utf8")) * Decimal('0.1'))
-      self.kp = float(Decimal(self.params.get("TorqueKp", encoding="utf8")) * Decimal('0.1')) / self.max_lat_accel
-      self.kf = float(Decimal(self.params.get("TorqueKf", encoding="utf8")) * Decimal('0.1')) / self.max_lat_accel
-      self.ki = float(Decimal(self.params.get("TorqueKi", encoding="utf8")) * Decimal('0.1')) / self.max_lat_accel
+      max_lat_accel = float(Decimal(self.params.get("TorqueMaxLatAccel", encoding="utf8")) * Decimal('0.1'))
+      kp = float(Decimal(self.params.get("TorqueKp", encoding="utf8")) * Decimal('0.1')) / max_lat_accel
+      kf = float(Decimal(self.params.get("TorqueKf", encoding="utf8")) * Decimal('0.1')) / max_lat_accel
+      ki = float(Decimal(self.params.get("TorqueKi", encoding="utf8")) * Decimal('0.1')) / max_lat_accel
+      modern_torque_control = getattr(self, 'modern_torque_control', False)
+      pid_settings_changed = not modern_torque_control or \
+                             (max_lat_accel, kp, ki, kf) != (self.max_lat_accel, self.kp, self.ki, self.kf)
+      self.max_lat_accel = max_lat_accel
+      self.kp = kp
+      self.kf = kf
+      self.ki = ki
       self.friction = float(Decimal(self.params.get("TorqueFriction", encoding="utf8")) * Decimal('0.001'))
       self.use_steering_angle = self.params.get_bool('TorqueUseAngle')
       self.steering_angle_deadzone_deg = float(Decimal(self.params.get("TorqueAngDeadZone", encoding="utf8")) * Decimal('0.1'))
-      self._configure_pid()
+      if pid_settings_changed:
+        self._configure_pid()
         
       self.mpc_frame = 0
 
@@ -122,20 +129,30 @@ class LatControlTorque(LatControl):
       self.live_tune(CP)
 
     pid_log = log.ControlsState.LateralTorqueState.new_message()
+    if modern_torque_control:
+      actual_curvature = -VM.calc_curvature(math.radians(CS.steeringAngleDeg - params.angleOffsetDeg), CS.vEgo, params.roll)
+      curvature_deadzone = abs(VM.calc_curvature(math.radians(self.steering_angle_deadzone_deg), CS.vEgo, 0.0))
+      actual_lateral_accel = actual_curvature * CS.vEgo ** 2
+      if CS.vEgo < MIN_STEER_SPEED or not active:
+        self.pid.reset()
+        self.lat_accel_request_buffer.clear()
+        self.lat_accel_request_buffer.extend([actual_lateral_accel] * self.lat_accel_request_buffer_len)
+        self.jerk_filter.x = 0.0
 
     if CS.vEgo < MIN_STEER_SPEED or not active:
       output_torque = 0.0
       pid_log.active = False
     else:
-      if self.use_steering_angle or modern_torque_control:
-        actual_curvature = -VM.calc_curvature(math.radians(CS.steeringAngleDeg - params.angleOffsetDeg), CS.vEgo, params.roll)
-        curvature_deadzone = abs(VM.calc_curvature(math.radians(self.steering_angle_deadzone_deg), CS.vEgo, 0.0))
-      else:
-        actual_curvature_vm = -VM.calc_curvature(math.radians(CS.steeringAngleDeg - params.angleOffsetDeg), CS.vEgo, params.roll)
-        actual_curvature_llk = llk.angularVelocityCalibrated.value[2] / CS.vEgo
-        actual_curvature = interp(CS.vEgo, [2.0, 5.0], [actual_curvature_vm, actual_curvature_llk])
-        curvature_deadzone = 0.0
-      actual_lateral_accel = actual_curvature * CS.vEgo ** 2
+      if not modern_torque_control:
+        if self.use_steering_angle:
+          actual_curvature = -VM.calc_curvature(math.radians(CS.steeringAngleDeg - params.angleOffsetDeg), CS.vEgo, params.roll)
+          curvature_deadzone = abs(VM.calc_curvature(math.radians(self.steering_angle_deadzone_deg), CS.vEgo, 0.0))
+        else:
+          actual_curvature_vm = -VM.calc_curvature(math.radians(CS.steeringAngleDeg - params.angleOffsetDeg), CS.vEgo, params.roll)
+          actual_curvature_llk = llk.angularVelocityCalibrated.value[2] / CS.vEgo
+          actual_curvature = interp(CS.vEgo, [2.0, 5.0], [actual_curvature_vm, actual_curvature_llk])
+          curvature_deadzone = 0.0
+        actual_lateral_accel = actual_curvature * CS.vEgo ** 2
       lateral_accel_deadzone = curvature_deadzone * CS.vEgo ** 2
 
       future_desired_lateral_accel = desired_curvature * CS.vEgo ** 2
@@ -163,14 +180,15 @@ class LatControlTorque(LatControl):
       ff = future_desired_lateral_accel - params.roll * ACCELERATION_DUE_TO_GRAVITY
       # convert friction into lateral accel units for feedforward
       friction_error = error + JERK_GAIN * desired_lateral_jerk
-      friction_compensation = interp(apply_deadzone(friction_error, lateral_accel_deadzone), [-FRICTION_THRESHOLD, FRICTION_THRESHOLD], [-self.friction, self.friction])
-      ff += friction_compensation / self.kf
+      friction = self.friction * self.max_lat_accel if modern_torque_control else self.friction
+      friction_compensation = interp(apply_deadzone(friction_error, lateral_accel_deadzone), [-FRICTION_THRESHOLD, FRICTION_THRESHOLD], [-friction, friction])
+      ff += friction_compensation if modern_torque_control else friction_compensation / self.kf
       freeze_integrator = CS.steeringRateLimited or CS.steeringPressed or CS.vEgo < 5
       controller_output = self.pid.update(error,
                                           feedforward=ff,
                                           speed=CS.vEgo,
                                           freeze_integrator=freeze_integrator)
-      output_torque = clip(controller_output * self.kf, -self.steer_max, self.steer_max) if modern_torque_control else controller_output
+      output_torque = clip(controller_output / max(self.max_lat_accel, 1e-3), -self.steer_max, self.steer_max) if modern_torque_control else controller_output
 
       pid_log.active = True
       pid_log.p = self.pid.p
