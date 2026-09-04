@@ -102,7 +102,7 @@ def initialize_v_cruise(v_ego, buttonEvents, v_cruise_last):
   return int(round(clip(v_ego * CV.MS_TO_KPH, V_CRUISE_ENABLE_MIN, V_CRUISE_MAX)))
 
 
-def get_lag_adjusted_curvature(CP, v_ego, psis, curvatures, curvature_rates, curve_preview_seconds=0.0):
+def get_lag_adjusted_curvature(CP, v_ego, psis, curvatures, curvature_rates):
   if len(psis) != CONTROL_N:
     psis = [0.0]*CONTROL_N
     curvatures = [0.0]*CONTROL_N
@@ -111,34 +111,13 @@ def get_lag_adjusted_curvature(CP, v_ego, psis, curvatures, curvature_rates, cur
   # TODO this needs more thought, use .2s extra for now to estimate other delays
   delay = max(0.01, CP.steerActuatorDelay)
   current_curvature = curvatures[0]
-  lookahead = delay
-
-  # On a low-speed sharp curve the EPS needs time to ramp to the requested torque.
-  # Look farther into the existing MPC path only when curvature is consistently
-  # increasing in the same direction. The normal curvature/jerk clipping below
-  # remains the final authority over the resulting request.
-  if curve_preview_seconds > 0.0 and 3.0 < v_ego < 14.0:
-    max_preview = clip(curve_preview_seconds, 0.0, 0.35)
-    preview_time = min(T_IDXS[CONTROL_N - 1], delay + max_preview)
-    near_curvature = interp(min(preview_time, delay + 0.15), T_IDXS[:CONTROL_N], curvatures)
-    future_curvature = interp(preview_time, T_IDXS[:CONTROL_N], curvatures)
-    future_lateral_accel = abs(future_curvature) * v_ego ** 2
-    curvature_growth = abs(future_curvature) - abs(current_curvature)
-    direction_consistent = current_curvature * near_curvature >= 0.0 and near_curvature * future_curvature > 0.0
-
-    if direction_consistent and future_lateral_accel > 0.8 and curvature_growth > 0.004:
-      speed_factor = interp(v_ego, [3.0, 5.0, 11.0, 14.0], [0.0, 1.0, 1.0, 0.0])
-      accel_factor = interp(future_lateral_accel, [0.8, 1.5], [0.0, 1.0])
-      growth_factor = interp(curvature_growth, [0.004, 0.02], [0.0, 1.0])
-      lookahead += max_preview * speed_factor * accel_factor * growth_factor
-
-  psi = interp(lookahead, T_IDXS[:CONTROL_N], psis)
+  psi = interp(delay, T_IDXS[:CONTROL_N], psis)
   desired_curvature_rate = curvature_rates[0]
 
   # MPC can plan to turn the wheel and turn back before t_delay. This means
   # in high delay cases some corrections never even get commanded. So just use
   # psi to calculate a simple linearization of desired curvature
-  curvature_diff_from_psi = psi / (max(v_ego, 1e-1) * lookahead) - current_curvature
+  curvature_diff_from_psi = psi / (max(v_ego, 1e-1) * delay) - current_curvature
   desired_curvature = current_curvature + 2 * curvature_diff_from_psi
 
   v_ego = max(v_ego, 0.1)

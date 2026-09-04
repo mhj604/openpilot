@@ -29,7 +29,7 @@ from selfdrive.controls.lib.vehicle_model import VehicleModel
 from selfdrive.locationd.calibrationd import Calibration
 from selfdrive.hardware import HARDWARE, TICI, EON
 from selfdrive.manager.process_config import managed_processes
-from selfdrive.car.hyundai.values import Buttons, CAR
+from selfdrive.car.hyundai.values import Buttons
 from decimal import Decimal
 
 import common.log as trace1
@@ -105,7 +105,6 @@ class Controls:
 
     self.CI, self.CP, candidate = get_car(self.can_sock, self.pm.sock['sendcan'])
     self.CP.alternativeExperience = 0  # see panda/board/safety_declarations.h for allowed values
-    self.grandeur_curve_preview = self.CP.carFingerprint == CAR.GRANDEUR_HEV_IG and self.CP.sccBus == -1
 
     # read params
     self.is_metric = params.get_bool("IsMetric")
@@ -843,13 +842,10 @@ class Controls:
 
       # Steering PID loop and lateral MPC
       lat_active = self.active and not CS.steerFaultPermanent and not (CS.vEgo < self.CP.minSteerSpeed and self.no_mdps_mods) and not self.lkas_temporary_off
-      curve_preview_seconds = 0.35 if self.grandeur_curve_preview and lat_active and not CS.steeringPressed and \
-                                             lat_plan.mpcSolutionValid and lat_plan.laneChangeState == LaneChangeState.off else 0.0
       desired_curvature, desired_curvature_rate = get_lag_adjusted_curvature(self.CP, CS.vEgo,
                                                                              lat_plan.psis,
                                                                              lat_plan.curvatures,
-                                                                             lat_plan.curvatureRates,
-                                                                             curve_preview_seconds)
+                                                                             lat_plan.curvatureRates)
       actuators.steer, actuators.steeringAngleDeg, lac_log = self.LaC.update(lat_active, CS, self.CP, self.VM, params, self.last_actuators,
                                                                              desired_curvature, desired_curvature_rate, self.sm['liveLocationKalman'])
       self.desired_angle_deg = actuators.steeringAngleDeg
