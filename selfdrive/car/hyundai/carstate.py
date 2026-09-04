@@ -566,6 +566,7 @@ class CarState(CarStateBase):
         ("Cruise_Main", "CRUISE_STATUS"),
         ("Cruise_Active", "CRUISE_STATUS")
       ]
+      checks += [("CRUISE_STATUS", 10)]
     if CP.sccBus == 0 and CP.pcmCruise:
       checks += [
         ("SCC11", 50),

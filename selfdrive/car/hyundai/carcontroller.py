@@ -94,9 +94,10 @@ class CarController():
 
     self.params = Params()
     self.no_scc = CP.sccBus == -1
+    self.grandeur_no_scc = CP.carFingerprint == CAR.GRANDEUR_HEV_IG and self.no_scc
     self.mode_change_switch = int(self.params.get("CruiseStatemodeSelInit", encoding="utf8"))
     # No-SCC Grandeur controls its stock conventional cruise with RES/SET.
-    self.opkr_variablecruise = self.params.get_bool("OpkrVariableCruise") or self.no_scc
+    self.opkr_variablecruise = self.params.get_bool("OpkrVariableCruise") or self.grandeur_no_scc
     self.opkr_autoresume = self.params.get_bool("OpkrAutoResume") and not self.no_scc
     self.opkr_cruisegap_auto_adj = self.params.get_bool("CruiseGapAdjust") and not self.no_scc
     self.opkr_cruise_auto_res = self.params.get_bool("CruiseAutoRes") and not self.no_scc

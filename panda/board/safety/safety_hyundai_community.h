@@ -26,6 +26,13 @@ const CanMsg HYUNDAI_COMMUNITY_TX_MSGS[] = {
   {2000, 0, 8},  // SCC_DIAG, Bus 0
 };
 
+// The no-camera Grandeur has no SCC/FCA/radar ECU. Its host is lateral-only
+// and only needs steering plus RES/SET button commands for stock cruise.
+const CanMsg HYUNDAI_COMMUNITY_NO_CAMERA_TX_MSGS[] = {
+  {832, 0, 8},  // LKAS11 Bus 0
+  {1265, 0, 4}, // CLU11 Bus 0
+};
+
 // older hyundai models have less checks due to missing counters and checksums
 AddrCheckStruct hyundai_community_addr_checks[] = {
   {.msg = {{608, 0, 8, .check_checksum = true, .max_counter = 3U, .expected_timestep = 10000U},
@@ -34,8 +41,52 @@ AddrCheckStruct hyundai_community_addr_checks[] = {
   // {.msg = {{916, 0, 8, .expected_timestep = 20000U}}}, some Santa Fe does not have this msg, need to find alternative
 };
 
+// Measured on the no-camera Grandeur: MDPS12 and ESP12 are 100 Hz, while
+// CRUISE_STATUS is 10 Hz. MDPS12 uses an 8-bit rolling counter and checksum;
+// ESP12 uses a 4-bit rolling counter. CRUISE_STATUS has neither in its DBC.
+AddrCheckStruct hyundai_community_no_camera_addr_checks[] = {
+  {.msg = {{608, 0, 8, .check_checksum = true, .max_counter = 3U, .expected_timestep = 10000U},
+           {881, 0, 8, .expected_timestep = 10000U}, { 0 }}},
+  {.msg = {{902, 0, 8, .expected_timestep = 20000U}, { 0 }, { 0 }}},
+  {.msg = {{593, 0, 8, .check_checksum = true, .max_counter = 255U, .expected_timestep = 10000U}, { 0 }, { 0 }}},
+  {.msg = {{544, 0, 8, .max_counter = 15U, .expected_timestep = 10000U}, { 0 }, { 0 }}},
+  {.msg = {{1429, 0, 8, .expected_timestep = 100000U}, { 0 }, { 0 }}},
+};
+
 #define HYUNDAI_COMMUNITY_ADDR_CHECK_LEN (sizeof(hyundai_community_addr_checks) / sizeof(hyundai_community_addr_checks[0]))
+#define HYUNDAI_COMMUNITY_NO_CAMERA_ADDR_CHECK_LEN (sizeof(hyundai_community_no_camera_addr_checks) / sizeof(hyundai_community_no_camera_addr_checks[0]))
 addr_checks hyundai_community_rx_checks = {hyundai_community_addr_checks, HYUNDAI_COMMUNITY_ADDR_CHECK_LEN};
+
+static uint8_t hyundai_community_get_counter(CANPacket_t *to_push) {
+  int addr = GET_ADDR(to_push);
+  if (addr == 593) {
+    return GET_BYTE(to_push, 2);
+  }
+  if (addr == 544) {
+    return GET_BYTE(to_push, 7) >> 4;
+  }
+  return hyundai_get_counter(to_push);
+}
+
+static uint8_t hyundai_community_get_checksum(CANPacket_t *to_push) {
+  if (GET_ADDR(to_push) == 593) {
+    return GET_BYTE(to_push, 3);
+  }
+  return hyundai_get_checksum(to_push);
+}
+
+static uint8_t hyundai_community_compute_checksum(CANPacket_t *to_push) {
+  if (GET_ADDR(to_push) == 593) {
+    uint8_t checksum = 0U;
+    for (int i = 0; i < 8; i++) {
+      if (i != 3) {
+        checksum += GET_BYTE(to_push, i);
+      }
+    }
+    return checksum;
+  }
+  return hyundai_compute_checksum(to_push);
+}
 
 static int hyundai_community_rx_hook(CANPacket_t *to_push) {
 
@@ -43,8 +94,8 @@ static int hyundai_community_rx_hook(CANPacket_t *to_push) {
   int bus = GET_BUS(to_push);
 
   bool valid = addr_safety_check(to_push, &hyundai_community_rx_checks,
-                            hyundai_get_checksum, hyundai_compute_checksum,
-                            hyundai_get_counter);
+                            hyundai_community_get_checksum, hyundai_community_compute_checksum,
+                            hyundai_community_get_counter);
 
   if (!valid){
     puth(addr);
@@ -111,6 +162,7 @@ static int hyundai_community_rx_hook(CANPacket_t *to_push) {
     // main state: byte 6 is 0 when off, 4 in standby, and 12 when active.
     if (HKG_no_camera && addr == 1429 && bus == 0) {
       bool cruise_main = (GET_BYTE(to_push, 6) & 0x4U) != 0U;
+      cruise_engaged_prev = cruise_main;
       if (!cruise_main) {
         controls_allowed = 0;
       } else if (!controls_allowed && !HKG_brake_pressed) {
@@ -151,7 +203,10 @@ static int hyundai_community_tx_hook(CANPacket_t *to_send, bool longitudinal_all
   int addr = GET_ADDR(to_send);
   int bus = GET_BUS(to_send);
 
-  if (!msg_allowed(to_send, HYUNDAI_COMMUNITY_TX_MSGS, sizeof(HYUNDAI_COMMUNITY_TX_MSGS)/sizeof(HYUNDAI_COMMUNITY_TX_MSGS[0]))) {
+  bool allowed = HKG_no_camera ?
+    msg_allowed(to_send, HYUNDAI_COMMUNITY_NO_CAMERA_TX_MSGS, sizeof(HYUNDAI_COMMUNITY_NO_CAMERA_TX_MSGS)/sizeof(HYUNDAI_COMMUNITY_NO_CAMERA_TX_MSGS[0])) :
+    msg_allowed(to_send, HYUNDAI_COMMUNITY_TX_MSGS, sizeof(HYUNDAI_COMMUNITY_TX_MSGS)/sizeof(HYUNDAI_COMMUNITY_TX_MSGS[0]));
+  if (!allowed) {
     tx = 0;
     puth(addr);
 	puth(bus);
@@ -201,7 +256,7 @@ static int hyundai_community_tx_hook(CANPacket_t *to_send, bool longitudinal_all
     }
 
     // reset to 0 if either controls is not allowed or there's a violation
-    if (!controls_allowed) { // a reset worsen the issue of Panda blocking some valid LKAS messages
+    if (violation || !controls_allowed) {
       desired_torque_last = 0;
       rt_torque_last = 0;
       ts_last = ts;
@@ -218,6 +273,15 @@ static int hyundai_community_tx_hook(CANPacket_t *to_send, bool longitudinal_all
   //allow clu11 to be sent to MDPS if MDPS is not on bus0
   if (addr == 1265 && !controls_allowed && (bus != HKG_mdps_bus && HKG_mdps_bus == 1)) {
     if ((GET_BYTES_04(to_send) & 0x7U) != 4U) {
+      tx = 0;
+    }
+  }
+
+  // This target only uses synthetic RES/SET while lateral control is allowed.
+  // Main/cruise toggling remains a physical driver-button action.
+  if (HKG_no_camera && addr == 1265) {
+    int cruise_button = GET_BYTES_04(to_send) & 0x7U;
+    if (!controls_allowed || ((cruise_button != 1) && (cruise_button != 2))) {
       tx = 0;
     }
   }
@@ -310,7 +374,11 @@ static const addr_checks* hyundai_community_init(uint16_t param) {
   if (current_board->has_obd && HKG_forward_obd) {
     current_board->set_can_mode(CAN_MODE_OBD_CAN2);
   }
-  hyundai_community_rx_checks = (addr_checks){hyundai_community_addr_checks, HYUNDAI_COMMUNITY_ADDR_CHECK_LEN};
+  if (HKG_no_camera) {
+    hyundai_community_rx_checks = (addr_checks){hyundai_community_no_camera_addr_checks, HYUNDAI_COMMUNITY_NO_CAMERA_ADDR_CHECK_LEN};
+  } else {
+    hyundai_community_rx_checks = (addr_checks){hyundai_community_addr_checks, HYUNDAI_COMMUNITY_ADDR_CHECK_LEN};
+  }
   return &hyundai_community_rx_checks;
 }
 

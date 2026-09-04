@@ -78,7 +78,9 @@ class LatControlTorque(LatControl):
       kp = [INTERP_SPEEDS, speed_kp]
       ki = self.ki * self.max_lat_accel
       pid_limit = max(self.max_lat_accel, 1e-3)
-      pid_kf = self.kf * self.max_lat_accel
+      # Apply the configurable acceleration feedforward explicitly in update().
+      # Unity here prevents it from also scaling the friction compensation.
+      pid_kf = 1.0
     else:
       kp = self.kp
       ki = self.ki
@@ -97,7 +99,7 @@ class LatControlTorque(LatControl):
         self.lat_accel_request_buffer.extend([0.0] * self.lat_accel_request_buffer_len)
         self.jerk_filter.x = 0.0
 
-  def live_tune(self, CP):
+  def live_tune(self, CP, active):
     self.mpc_frame += 1
     if self.mpc_frame % 300 == 0:
       max_lat_accel = float(Decimal(self.params.get("TorqueMaxLatAccel", encoding="utf8")) * Decimal('0.1'))
@@ -105,6 +107,11 @@ class LatControlTorque(LatControl):
       kf = float(Decimal(self.params.get("TorqueKf", encoding="utf8")) * Decimal('0.1')) / max_lat_accel
       ki = float(Decimal(self.params.get("TorqueKi", encoding="utf8")) * Decimal('0.1')) / max_lat_accel
       modern_torque_control = getattr(self, 'modern_torque_control', False)
+      # Stage modern-controller changes until disengaged to avoid resetting the
+      # integrator or changing feedforward while steering is active.
+      if modern_torque_control and active:
+        self.mpc_frame = 0
+        return
       pid_settings_changed = not modern_torque_control or \
                              (max_lat_accel, kp, ki, kf) != (self.max_lat_accel, self.kp, self.ki, self.kf)
       self.max_lat_accel = max_lat_accel
@@ -126,7 +133,7 @@ class LatControlTorque(LatControl):
       self.lt_timer = 0
       self.live_tune_enabled = self.params.get_bool("OpkrLiveTunePanelEnable")
     if self.live_tune_enabled:
-      self.live_tune(CP)
+      self.live_tune(CP, active)
 
     pid_log = log.ControlsState.LateralTorqueState.new_message()
     if modern_torque_control:
@@ -177,7 +184,9 @@ class LatControlTorque(LatControl):
       error = setpoint - measurement
       pid_log.error = error
 
-      ff = future_desired_lateral_accel - params.roll * ACCELERATION_DUE_TO_GRAVITY
+      gravity_ff = future_desired_lateral_accel - params.roll * ACCELERATION_DUE_TO_GRAVITY
+      raw_kf = self.kf * self.max_lat_accel if modern_torque_control else 1.0
+      ff = raw_kf * gravity_ff if modern_torque_control else gravity_ff
       # convert friction into lateral accel units for feedforward
       friction_error = error + JERK_GAIN * desired_lateral_jerk
       friction = self.friction * self.max_lat_accel if modern_torque_control else self.friction
