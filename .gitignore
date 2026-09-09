@@ -83,3 +83,6 @@ models/*.thneed
 build/
 
 !**/.gitkeep
+
+# Private receive-only steering captures: raw CAN, parameters, and road images.
+/outputs/steering*/
