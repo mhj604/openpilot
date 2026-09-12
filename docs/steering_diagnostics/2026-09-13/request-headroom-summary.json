@@ -1,0 +1,981 @@
+{
+  "source_tool": "tools/steering_diagnostics/summarize_request_headroom.py",
+  "analysis_only": true,
+  "selection_note": "See final-record-review-ko.md for selection thresholds, missing coverage, and limits of inference.",
+  "recordings": [
+    {
+      "capture": "steering-20260908-230648",
+      "commit": "4caf69deadb0f6a14691d09f80a941bd6b49da7b",
+      "host_scale": 384,
+      "tx_samples": 72551,
+      "alignment_over_30ms": 809,
+      "speed_bands": {
+        "2_to_8_kph": {
+          "normal_samples": 1309,
+          "clean_samples": 1048,
+          "demand": {
+            "samples": 188,
+            "speed_kph": {
+              "min": 2,
+              "median": 4,
+              "max": 7.5
+            },
+            "angle_deg": {
+              "min": -124.7,
+              "median": -0.1,
+              "max": 144.9
+            },
+            "calculated_abs_request": {
+              "min": 78.6117,
+              "median": 311.814,
+              "max": 384
+            },
+            "transmitted_abs_request": {
+              "min": 39,
+              "median": 244.5,
+              "max": 384
+            },
+            "eps_abs_report": {
+              "min": 0.3,
+              "median": 7.8,
+              "max": 10.8
+            },
+            "calculated_at_limit": 86,
+            "transmitted_at_limit": 31,
+            "transmitted_near_limit": 34,
+            "rate_limited": 139,
+            "generic_fault": 0,
+            "controller_error": {
+              "min": -0.0171,
+              "median": 0.0017,
+              "max": 0.1942
+            },
+            "integrator": {
+              "min": -0.0545,
+              "median": -0.0347,
+              "max": -0.0028
+            },
+            "reported_saturation": 0,
+            "max_alignment_ms": 12.615
+          },
+          "under_limit_screen": {
+            "samples": 16,
+            "speed_kph": {
+              "min": 2,
+              "median": 2,
+              "max": 7.5
+            },
+            "angle_deg": {
+              "min": -5.9,
+              "median": -5.9,
+              "max": 5.8
+            },
+            "calculated_abs_request": {
+              "min": 78.6117,
+              "median": 88.9659,
+              "max": 172.9664
+            },
+            "transmitted_abs_request": {
+              "min": 79,
+              "median": 90,
+              "max": 173
+            },
+            "eps_abs_report": {
+              "min": 2.6,
+              "median": 3.9,
+              "max": 7.4
+            },
+            "calculated_at_limit": 0,
+            "transmitted_at_limit": 0,
+            "transmitted_near_limit": 0,
+            "rate_limited": 0,
+            "generic_fault": 0,
+            "controller_error": {
+              "min": -0.0136,
+              "median": 0.0009,
+              "max": 0.0013
+            },
+            "integrator": {
+              "min": -0.0545,
+              "median": -0.0301,
+              "max": -0.0301
+            },
+            "reported_saturation": 0,
+            "max_alignment_ms": 12.537
+          },
+          "longest_under_limit_screen_s": 0.07,
+          "under_limit_screen_times": [
+            67.812,
+            67.822,
+            67.832,
+            67.842,
+            67.852,
+            67.862,
+            612.832,
+            612.842
+          ]
+        },
+        "8_to_18_kph": {
+          "normal_samples": 2372,
+          "clean_samples": 989,
+          "demand": {
+            "samples": 39,
+            "speed_kph": {
+              "min": 8,
+              "median": 13,
+              "max": 17.5
+            },
+            "angle_deg": {
+              "min": -143.8,
+              "median": -38.7,
+              "max": 7.5
+            },
+            "calculated_abs_request": {
+              "min": 116.7245,
+              "median": 342.2477,
+              "max": 384
+            },
+            "transmitted_abs_request": {
+              "min": 9,
+              "median": 109,
+              "max": 194
+            },
+            "eps_abs_report": {
+              "min": 0.1,
+              "median": 4.1,
+              "max": 8.8
+            },
+            "calculated_at_limit": 15,
+            "transmitted_at_limit": 0,
+            "transmitted_near_limit": 0,
+            "rate_limited": 38,
+            "generic_fault": 0,
+            "controller_error": {
+              "min": -0.0764,
+              "median": 0.0532,
+              "max": 0.1286
+            },
+            "integrator": {
+              "min": -0.0545,
+              "median": -0.0029,
+              "max": 0
+            },
+            "reported_saturation": 0,
+            "max_alignment_ms": 8.207
+          },
+          "under_limit_screen": {
+            "samples": 0,
+            "speed_kph": null,
+            "angle_deg": null,
+            "calculated_abs_request": null,
+            "transmitted_abs_request": null,
+            "eps_abs_report": null,
+            "calculated_at_limit": 0,
+            "transmitted_at_limit": 0,
+            "transmitted_near_limit": 0,
+            "rate_limited": 0,
+            "generic_fault": 0,
+            "controller_error": null,
+            "integrator": null,
+            "reported_saturation": 0,
+            "max_alignment_ms": null
+          },
+          "longest_under_limit_screen_s": 0,
+          "under_limit_screen_times": []
+        },
+        "18_to_36_kph": {
+          "normal_samples": 17941,
+          "clean_samples": 10783,
+          "demand": {
+            "samples": 320,
+            "speed_kph": {
+              "min": 18,
+              "median": 28,
+              "max": 35.5
+            },
+            "angle_deg": {
+              "min": -83.9,
+              "median": -31.5,
+              "max": 103.1
+            },
+            "calculated_abs_request": {
+              "min": 109.2842,
+              "median": 384,
+              "max": 384
+            },
+            "transmitted_abs_request": {
+              "min": 16,
+              "median": 324.5,
+              "max": 384
+            },
+            "eps_abs_report": {
+              "min": 0.1,
+              "median": 9.9,
+              "max": 11.3
+            },
+            "calculated_at_limit": 256,
+            "transmitted_at_limit": 122,
+            "transmitted_near_limit": 125,
+            "rate_limited": 202,
+            "generic_fault": 0,
+            "controller_error": {
+              "min": -0.7045,
+              "median": 0.3277,
+              "max": 0.664
+            },
+            "integrator": {
+              "min": -0.0519,
+              "median": -0.0087,
+              "max": 0.0454
+            },
+            "reported_saturation": 0,
+            "max_alignment_ms": 27.763
+          },
+          "under_limit_screen": {
+            "samples": 0,
+            "speed_kph": null,
+            "angle_deg": null,
+            "calculated_abs_request": null,
+            "transmitted_abs_request": null,
+            "eps_abs_report": null,
+            "calculated_at_limit": 0,
+            "transmitted_at_limit": 0,
+            "transmitted_near_limit": 0,
+            "rate_limited": 0,
+            "generic_fault": 0,
+            "controller_error": null,
+            "integrator": null,
+            "reported_saturation": 0,
+            "max_alignment_ms": null
+          },
+          "longest_under_limit_screen_s": 0,
+          "under_limit_screen_times": []
+        },
+        "36_to_200_kph": {
+          "normal_samples": 27222,
+          "clean_samples": 24768,
+          "demand": {
+            "samples": 0,
+            "speed_kph": null,
+            "angle_deg": null,
+            "calculated_abs_request": null,
+            "transmitted_abs_request": null,
+            "eps_abs_report": null,
+            "calculated_at_limit": 0,
+            "transmitted_at_limit": 0,
+            "transmitted_near_limit": 0,
+            "rate_limited": 0,
+            "generic_fault": 0,
+            "controller_error": null,
+            "integrator": null,
+            "reported_saturation": 0,
+            "max_alignment_ms": null
+          },
+          "under_limit_screen": {
+            "samples": 0,
+            "speed_kph": null,
+            "angle_deg": null,
+            "calculated_abs_request": null,
+            "transmitted_abs_request": null,
+            "eps_abs_report": null,
+            "calculated_at_limit": 0,
+            "transmitted_at_limit": 0,
+            "transmitted_near_limit": 0,
+            "rate_limited": 0,
+            "generic_fault": 0,
+            "controller_error": null,
+            "integrator": null,
+            "reported_saturation": 0,
+            "max_alignment_ms": null
+          },
+          "longest_under_limit_screen_s": 0,
+          "under_limit_screen_times": []
+        }
+      },
+      "confirmed_windows": {
+        "211.5_to_212.4_s": {
+          "all_aligned": {
+            "samples": 90,
+            "speed_kph": {
+              "min": 27,
+              "median": 28.5,
+              "max": 30
+            },
+            "angle_deg": {
+              "min": -37.6,
+              "median": -36.2,
+              "max": -31.7
+            },
+            "calculated_abs_request": {
+              "min": 384,
+              "median": 384,
+              "max": 384
+            },
+            "transmitted_abs_request": {
+              "min": 384,
+              "median": 384,
+              "max": 384
+            },
+            "eps_abs_report": {
+              "min": 9.6,
+              "median": 10.4,
+              "max": 11.3
+            },
+            "calculated_at_limit": 90,
+            "transmitted_at_limit": 90,
+            "transmitted_near_limit": 90,
+            "rate_limited": 1,
+            "generic_fault": 0,
+            "controller_error": {
+              "min": 0.3091,
+              "median": 0.4251,
+              "max": 0.6265
+            },
+            "integrator": {
+              "min": -0.0513,
+              "median": -0.0325,
+              "max": -0.0115
+            },
+            "reported_saturation": 0,
+            "max_alignment_ms": 18.178
+          },
+          "clean": {
+            "samples": 90,
+            "speed_kph": {
+              "min": 27,
+              "median": 28.5,
+              "max": 30
+            },
+            "angle_deg": {
+              "min": -37.6,
+              "median": -36.2,
+              "max": -31.7
+            },
+            "calculated_abs_request": {
+              "min": 384,
+              "median": 384,
+              "max": 384
+            },
+            "transmitted_abs_request": {
+              "min": 384,
+              "median": 384,
+              "max": 384
+            },
+            "eps_abs_report": {
+              "min": 9.6,
+              "median": 10.4,
+              "max": 11.3
+            },
+            "calculated_at_limit": 90,
+            "transmitted_at_limit": 90,
+            "transmitted_near_limit": 90,
+            "rate_limited": 1,
+            "generic_fault": 0,
+            "controller_error": {
+              "min": 0.3091,
+              "median": 0.4251,
+              "max": 0.6265
+            },
+            "integrator": {
+              "min": -0.0513,
+              "median": -0.0325,
+              "max": -0.0115
+            },
+            "reported_saturation": 0,
+            "max_alignment_ms": 18.178
+          },
+          "raw_fault_samples": 0,
+          "max_abs_driver": 47
+        }
+      },
+      "caveats": [
+        "Samples are not independent experiments or exposure durations.",
+        "Under-limit screens are not proof of safe spare torque or bad tuning.",
+        "Error is the controller's delayed, model-derived error, not road truth.",
+        "CAN echo is not a measurement of ECU-internal received torque.",
+        "EPS report units are not established as Nm."
+      ]
+    },
+    {
+      "capture": "steering-geometry-20260909-183631-219055",
+      "commit": "4caf69deadb0f6a14691d09f80a941bd6b49da7b",
+      "host_scale": 384,
+      "tx_samples": 35375,
+      "alignment_over_30ms": 11899,
+      "speed_bands": {
+        "2_to_8_kph": {
+          "normal_samples": 369,
+          "clean_samples": 121,
+          "demand": {
+            "samples": 61,
+            "speed_kph": {
+              "min": 2,
+              "median": 7,
+              "max": 7.5
+            },
+            "angle_deg": {
+              "min": 6.4,
+              "median": 16.8,
+              "max": 49.3
+            },
+            "calculated_abs_request": {
+              "min": 168.5175,
+              "median": 225.1198,
+              "max": 364.059
+            },
+            "transmitted_abs_request": {
+              "min": 21,
+              "median": 120,
+              "max": 256
+            },
+            "eps_abs_report": {
+              "min": 0,
+              "median": 4.8,
+              "max": 10.1
+            },
+            "calculated_at_limit": 0,
+            "transmitted_at_limit": 0,
+            "transmitted_near_limit": 0,
+            "rate_limited": 47,
+            "generic_fault": 0,
+            "controller_error": {
+              "min": -0.0223,
+              "median": -0.0054,
+              "max": 0.027
+            },
+            "integrator": {
+              "min": -0.0457,
+              "median": -0.0457,
+              "max": -0.0345
+            },
+            "reported_saturation": 0,
+            "max_alignment_ms": 27.874
+          },
+          "under_limit_screen": {
+            "samples": 11,
+            "speed_kph": {
+              "min": 2,
+              "median": 2,
+              "max": 2.5
+            },
+            "angle_deg": {
+              "min": 15.7,
+              "median": 16.7,
+              "max": 17.6
+            },
+            "calculated_abs_request": {
+              "min": 212.9095,
+              "median": 216.3392,
+              "max": 225.7185
+            },
+            "transmitted_abs_request": {
+              "min": 213,
+              "median": 216,
+              "max": 226
+            },
+            "eps_abs_report": {
+              "min": 5.5,
+              "median": 8.3,
+              "max": 9.4
+            },
+            "calculated_at_limit": 0,
+            "transmitted_at_limit": 0,
+            "transmitted_near_limit": 0,
+            "rate_limited": 0,
+            "generic_fault": 0,
+            "controller_error": {
+              "min": -0.0054,
+              "median": -0.0052,
+              "max": -0.0051
+            },
+            "integrator": {
+              "min": -0.0457,
+              "median": -0.0457,
+              "max": -0.0457
+            },
+            "reported_saturation": 0,
+            "max_alignment_ms": 19.122
+          },
+          "longest_under_limit_screen_s": 0.03,
+          "under_limit_screen_times": [
+            305.544,
+            305.554,
+            305.594,
+            305.604,
+            305.764,
+            305.774,
+            305.784,
+            305.815
+          ]
+        },
+        "8_to_18_kph": {
+          "normal_samples": 3060,
+          "clean_samples": 1095,
+          "demand": {
+            "samples": 132,
+            "speed_kph": {
+              "min": 12,
+              "median": 16,
+              "max": 17.5
+            },
+            "angle_deg": {
+              "min": -156.8,
+              "median": -78.4,
+              "max": 132.7
+            },
+            "calculated_abs_request": {
+              "min": 145.8102,
+              "median": 384,
+              "max": 384
+            },
+            "transmitted_abs_request": {
+              "min": 6,
+              "median": 202.5,
+              "max": 384
+            },
+            "eps_abs_report": {
+              "min": 0,
+              "median": 6.95,
+              "max": 11.2
+            },
+            "calculated_at_limit": 100,
+            "transmitted_at_limit": 11,
+            "transmitted_near_limit": 13,
+            "rate_limited": 125,
+            "generic_fault": 0,
+            "controller_error": {
+              "min": -0.1237,
+              "median": 0.1561,
+              "max": 0.4578
+            },
+            "integrator": {
+              "min": -0.0457,
+              "median": -0.0345,
+              "max": -0.0087
+            },
+            "reported_saturation": 0,
+            "max_alignment_ms": 28.206
+          },
+          "under_limit_screen": {
+            "samples": 0,
+            "speed_kph": null,
+            "angle_deg": null,
+            "calculated_abs_request": null,
+            "transmitted_abs_request": null,
+            "eps_abs_report": null,
+            "calculated_at_limit": 0,
+            "transmitted_at_limit": 0,
+            "transmitted_near_limit": 0,
+            "rate_limited": 0,
+            "generic_fault": 0,
+            "controller_error": null,
+            "integrator": null,
+            "reported_saturation": 0,
+            "max_alignment_ms": null
+          },
+          "longest_under_limit_screen_s": 0,
+          "under_limit_screen_times": []
+        },
+        "18_to_36_kph": {
+          "normal_samples": 6404,
+          "clean_samples": 4839,
+          "demand": {
+            "samples": 67,
+            "speed_kph": {
+              "min": 18,
+              "median": 19.5,
+              "max": 32
+            },
+            "angle_deg": {
+              "min": -51.6,
+              "median": -13.8,
+              "max": 39.8
+            },
+            "calculated_abs_request": {
+              "min": 141.1212,
+              "median": 262.5328,
+              "max": 384
+            },
+            "transmitted_abs_request": {
+              "min": 15,
+              "median": 65,
+              "max": 294
+            },
+            "eps_abs_report": {
+              "min": 0,
+              "median": 2.7,
+              "max": 9.8
+            },
+            "calculated_at_limit": 8,
+            "transmitted_at_limit": 0,
+            "transmitted_near_limit": 0,
+            "rate_limited": 67,
+            "generic_fault": 0,
+            "controller_error": {
+              "min": -0.2341,
+              "median": 0.0859,
+              "max": 0.289
+            },
+            "integrator": {
+              "min": -0.059,
+              "median": -0.0345,
+              "max": -0.0087
+            },
+            "reported_saturation": 0,
+            "max_alignment_ms": 27.412
+          },
+          "under_limit_screen": {
+            "samples": 0,
+            "speed_kph": null,
+            "angle_deg": null,
+            "calculated_abs_request": null,
+            "transmitted_abs_request": null,
+            "eps_abs_report": null,
+            "calculated_at_limit": 0,
+            "transmitted_at_limit": 0,
+            "transmitted_near_limit": 0,
+            "rate_limited": 0,
+            "generic_fault": 0,
+            "controller_error": null,
+            "integrator": null,
+            "reported_saturation": 0,
+            "max_alignment_ms": null
+          },
+          "longest_under_limit_screen_s": 0,
+          "under_limit_screen_times": []
+        },
+        "36_to_200_kph": {
+          "normal_samples": 3126,
+          "clean_samples": 2738,
+          "demand": {
+            "samples": 1,
+            "speed_kph": {
+              "min": 43.5,
+              "median": 43.5,
+              "max": 43.5
+            },
+            "angle_deg": {
+              "min": 1.9,
+              "median": 1.9,
+              "max": 1.9
+            },
+            "calculated_abs_request": {
+              "min": 299.1385,
+              "median": 299.1385,
+              "max": 299.1385
+            },
+            "transmitted_abs_request": {
+              "min": 48,
+              "median": 48,
+              "max": 48
+            },
+            "eps_abs_report": {
+              "min": 1.8,
+              "median": 1.8,
+              "max": 1.8
+            },
+            "calculated_at_limit": 0,
+            "transmitted_at_limit": 0,
+            "transmitted_near_limit": 0,
+            "rate_limited": 1,
+            "generic_fault": 0,
+            "controller_error": {
+              "min": 0.4438,
+              "median": 0.4438,
+              "max": 0.4438
+            },
+            "integrator": {
+              "min": -0.0567,
+              "median": -0.0567,
+              "max": -0.0567
+            },
+            "reported_saturation": 0,
+            "max_alignment_ms": 3.119
+          },
+          "under_limit_screen": {
+            "samples": 0,
+            "speed_kph": null,
+            "angle_deg": null,
+            "calculated_abs_request": null,
+            "transmitted_abs_request": null,
+            "eps_abs_report": null,
+            "calculated_at_limit": 0,
+            "transmitted_at_limit": 0,
+            "transmitted_near_limit": 0,
+            "rate_limited": 0,
+            "generic_fault": 0,
+            "controller_error": null,
+            "integrator": null,
+            "reported_saturation": 0,
+            "max_alignment_ms": null
+          },
+          "longest_under_limit_screen_s": 0,
+          "under_limit_screen_times": []
+        }
+      },
+      "confirmed_windows": {
+        "155_to_157.15_s": {
+          "all_aligned": {
+            "samples": 162,
+            "speed_kph": {
+              "min": 14,
+              "median": 16,
+              "max": 18
+            },
+            "angle_deg": {
+              "min": -105,
+              "median": -85.65,
+              "max": -46.3
+            },
+            "calculated_abs_request": {
+              "min": 293.2438,
+              "median": 384,
+              "max": 384
+            },
+            "transmitted_abs_request": {
+              "min": 264,
+              "median": 345,
+              "max": 384
+            },
+            "eps_abs_report": {
+              "min": 7.5,
+              "median": 9.8,
+              "max": 11.2
+            },
+            "calculated_at_limit": 155,
+            "transmitted_at_limit": 12,
+            "transmitted_near_limit": 15,
+            "rate_limited": 153,
+            "generic_fault": 0,
+            "controller_error": {
+              "min": 0.0585,
+              "median": 0.1696,
+              "max": 0.2498
+            },
+            "integrator": {
+              "min": -0.0345,
+              "median": -0.0345,
+              "max": -0.0345
+            },
+            "reported_saturation": 0,
+            "max_alignment_ms": 28.206
+          },
+          "clean": {
+            "samples": 72,
+            "speed_kph": {
+              "min": 14,
+              "median": 17,
+              "max": 18
+            },
+            "angle_deg": {
+              "min": -105,
+              "median": -81.6,
+              "max": -47.4
+            },
+            "calculated_abs_request": {
+              "min": 298.4025,
+              "median": 384,
+              "max": 384
+            },
+            "transmitted_abs_request": {
+              "min": 270,
+              "median": 351.5,
+              "max": 384
+            },
+            "eps_abs_report": {
+              "min": 8.9,
+              "median": 10.3,
+              "max": 11.2
+            },
+            "calculated_at_limit": 69,
+            "transmitted_at_limit": 11,
+            "transmitted_near_limit": 13,
+            "rate_limited": 65,
+            "generic_fault": 0,
+            "controller_error": {
+              "min": 0.0585,
+              "median": 0.1624,
+              "max": 0.2399
+            },
+            "integrator": {
+              "min": -0.0345,
+              "median": -0.0345,
+              "max": -0.0345
+            },
+            "reported_saturation": 0,
+            "max_alignment_ms": 28.206
+          },
+          "raw_fault_samples": 0,
+          "max_abs_driver": 112
+        },
+        "156.215_to_157.15_s": {
+          "all_aligned": {
+            "samples": 72,
+            "speed_kph": {
+              "min": 14,
+              "median": 15,
+              "max": 16
+            },
+            "angle_deg": {
+              "min": -105,
+              "median": -94.8,
+              "max": -90.9
+            },
+            "calculated_abs_request": {
+              "min": 293.2438,
+              "median": 384,
+              "max": 384
+            },
+            "transmitted_abs_request": {
+              "min": 292,
+              "median": 345,
+              "max": 366
+            },
+            "eps_abs_report": {
+              "min": 8.4,
+              "median": 9.9,
+              "max": 11.1
+            },
+            "calculated_at_limit": 68,
+            "transmitted_at_limit": 0,
+            "transmitted_near_limit": 0,
+            "rate_limited": 72,
+            "generic_fault": 0,
+            "controller_error": {
+              "min": 0.0585,
+              "median": 0.1808,
+              "max": 0.2399
+            },
+            "integrator": {
+              "min": -0.0345,
+              "median": -0.0345,
+              "max": -0.0345
+            },
+            "reported_saturation": 0,
+            "max_alignment_ms": 27.967
+          },
+          "clean": {
+            "samples": 31,
+            "speed_kph": {
+              "min": 14,
+              "median": 15,
+              "max": 16
+            },
+            "angle_deg": {
+              "min": -105,
+              "median": -94.7,
+              "max": -90.9
+            },
+            "calculated_abs_request": {
+              "min": 298.4025,
+              "median": 384,
+              "max": 384
+            },
+            "transmitted_abs_request": {
+              "min": 307,
+              "median": 348,
+              "max": 366
+            },
+            "eps_abs_report": {
+              "min": 9.5,
+              "median": 10.4,
+              "max": 11.1
+            },
+            "calculated_at_limit": 30,
+            "transmitted_at_limit": 0,
+            "transmitted_near_limit": 0,
+            "rate_limited": 31,
+            "generic_fault": 0,
+            "controller_error": {
+              "min": 0.0585,
+              "median": 0.1821,
+              "max": 0.2399
+            },
+            "integrator": {
+              "min": -0.0345,
+              "median": -0.0345,
+              "max": -0.0345
+            },
+            "reported_saturation": 0,
+            "max_alignment_ms": 27.719
+          },
+          "raw_fault_samples": 0,
+          "max_abs_driver": 112
+        },
+        "157.155_to_157.9_s": {
+          "all_aligned": {
+            "samples": 65,
+            "speed_kph": {
+              "min": 12.5,
+              "median": 13,
+              "max": 14
+            },
+            "angle_deg": {
+              "min": -108.3,
+              "median": -108.2,
+              "max": -105
+            },
+            "calculated_abs_request": {
+              "min": 136.7401,
+              "median": 384,
+              "max": 384
+            },
+            "transmitted_abs_request": {
+              "min": 274,
+              "median": 319,
+              "max": 384
+            },
+            "eps_abs_report": {
+              "min": 5,
+              "median": 6.5,
+              "max": 10.1
+            },
+            "calculated_at_limit": 45,
+            "transmitted_at_limit": 3,
+            "transmitted_near_limit": 4,
+            "rate_limited": 63,
+            "generic_fault": 0,
+            "controller_error": {
+              "min": 0.0095,
+              "median": 0.0964,
+              "max": 0.194
+            },
+            "integrator": {
+              "min": -0.0345,
+              "median": -0.0345,
+              "max": -0.0345
+            },
+            "reported_saturation": 0,
+            "max_alignment_ms": 27.514
+          },
+          "clean": {
+            "samples": 0,
+            "speed_kph": null,
+            "angle_deg": null,
+            "calculated_abs_request": null,
+            "transmitted_abs_request": null,
+            "eps_abs_report": null,
+            "calculated_at_limit": 0,
+            "transmitted_at_limit": 0,
+            "transmitted_near_limit": 0,
+            "rate_limited": 0,
+            "generic_fault": 0,
+            "controller_error": null,
+            "integrator": null,
+            "reported_saturation": 0,
+            "max_alignment_ms": null
+          },
+          "raw_fault_samples": 74,
+          "max_abs_driver": 83
+        }
+      },
+      "caveats": [
+        "Samples are not independent experiments or exposure durations.",
+        "Under-limit screens are not proof of safe spare torque or bad tuning.",
+        "Error is the controller's delayed, model-derived error, not road truth.",
+        "CAN echo is not a measurement of ECU-internal received torque.",
+        "EPS report units are not established as Nm."
+      ]
+    }
+  ]
+}

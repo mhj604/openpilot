@@ -35,6 +35,16 @@ python3 -B tools/steering_diagnostics/interpret_geometry_capture.py <캡처폴�
 - CAN 송신 확인은 프레임이 송신됐다는 의미다. MDPS가 같은 크기의 실제 보조력을 냈다는 증거와 구분한다.
 - 차량별 CAN 해석과 상한 384를 전제로 한 진단 코드다. 다른 차량의 범용 해석기로 사용하지 않는다.
 
+## 두 형식의 요청 여력 선별 집계
+
+`summarize_request_headroom.py`는 이전 형식과 geometry-v2의 저장 원본을 읽어 계산 요청·실제 송신·MDPS 상태를 연결한다. 캐시나 출력 파일을 만들지 않고 표준출력으로 요약한다. controller·MPC를 실행하거나 새 CAN 명령을 만들지 않는다.
+
+```text
+python3 -B tools/steering_diagnostics/summarize_request_headroom.py <이전캡처폴더> <geometry-v2캡처폴더>
+```
+
+이 도구의 기준값은 샘플 선별용이지 튜닝 설정이 아니다. 상한 아래인 표본을 찾았다고 안전하게 더 쓸 수 있는 토크가 증명되는 것은 아니다. 시각 차이·운전자 개입·오류·제한 적용을 함께 분리하며, [판독 방법과 한계](../../docs/steering_diagnostics/2026-09-13/final-record-review-ko.md)를 따라 해석한다. 이번 두 캡처와 같은 버스·CAN 신호 정의 및 동일한 기본/가변 상한을 전제로 한다.
+
 ## 이전 형식 보존
 
 - `capture_steering.py`, `steering_receive.py`: geometry-v2 이전의 수집기.
