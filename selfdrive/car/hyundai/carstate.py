@@ -32,6 +32,7 @@ class CarState(CarStateBase):
     self.lkas_button_on = True
     self.cruise_main_button = 0
     self.mdps_error_cnt = 0
+    self.mdps_torque_fault = False
     self.cruiseState_standstill = False
 
     self.lfahda = None
@@ -196,7 +197,13 @@ class CarState(CarStateBase):
     ret.steeringPressed = abs(ret.steeringTorque) > STEER_THRESHOLD
 
     self.mdps_error_cnt += 1 if cp_mdps.vl["MDPS12"]["CF_Mdps_ToiUnavail"] != 0 else -self.mdps_error_cnt
-    ret.steerFaultTemporary = self.mdps_error_cnt > 100 #cp_mdps.vl["MDPS12"]["CF_Mdps_ToiUnavail"] != 0
+    # This Grandeur can report an explicit torque fault while ToiUnavail stays
+    # clear. Keep the existing unavailable debounce/counter separate, since the
+    # car controller also uses it. ToiActive=0 alone is normal when disengaged.
+    self.mdps_torque_fault = self.no_mfc and bool(
+      cp_mdps.vl["MDPS12"]["CF_Mdps_ToiFlt"] or cp_mdps.vl["MDPS12"]["CF_Mdps_FailStat"]
+    )
+    ret.steerFaultTemporary = self.mdps_error_cnt > 100 or self.mdps_torque_fault
 
     if self.stock_conventional_cruise:
       self.VSetDis = cp.vl["ELECT_GEAR"]["Cruise_Set_Speed"]

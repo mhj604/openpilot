@@ -339,6 +339,11 @@ class CarInterface(CarInterfaceBase):
       ret, pcm_enable=not self.no_mfc
     )
 
+    # An explicit MDPS fault must reach the existing no-entry/soft-disable
+    # handling even when legacy warning suppression or standstill logic applies.
+    if self.no_mfc and self.CS.mdps_torque_fault and EventName.steerTempUnavailable not in events.events:
+      events.add(EventName.steerTempUnavailable)
+
     # No-SCC lateral-only must never engage outside Drive.
     if self.no_mfc and ret.gearShifter != car.CarState.GearShifter.drive:
       events.add(EventName.wrongGear)
